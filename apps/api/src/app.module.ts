@@ -22,6 +22,7 @@ import { DemandsModule } from './demands/demands.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PushModule } from './push/push.module';
 import { CommercialModule } from './commercial/commercial.module';
+import { MessagingModule } from './messaging/messaging.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { CommercialModule } from './commercial/commercial.module';
     NotificationsModule,
     PushModule,
     CommercialModule,
+    MessagingModule,
   ],
   controllers: [AppController],
 })
