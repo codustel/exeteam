@@ -8,6 +8,9 @@ import { UsersModule } from './users/users.module';
 import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
 import { TimeEntriesModule } from './time-entries/time-entries.module';
+import { DemandsModule } from './demands/demands.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { PushModule } from './push/push.module';
 
 @Module({
   imports: [
@@ -27,6 +30,9 @@ import { TimeEntriesModule } from './time-entries/time-entries.module';
     ProjectsModule,
     TasksModule,
     TimeEntriesModule,
+    DemandsModule,
+    NotificationsModule,
+    PushModule,
   ],
   controllers: [AppController],
 })
