@@ -99,7 +99,7 @@ export function DynamicForm({ config, defaultValues, onSubmit, isLoading, readOn
                 <Switch
                   id={fieldKey}
                   checked={!!currentValue}
-                  onCheckedChange={(checked) => setValue(fieldKey, checked)}
+                  onCheckedChange={(checked: boolean) => setValue(fieldKey, checked)}
                   disabled={readOnly}
                 />
                 <Label htmlFor={fieldKey} className="text-sm font-normal">
@@ -151,7 +151,7 @@ export function DynamicForm({ config, defaultValues, onSubmit, isLoading, readOn
                           <Checkbox
                             id={`${fieldKey}-${opt}`}
                             checked={selected}
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={(checked: boolean | 'indeterminate') => {
                               const current = (currentValue as string[]) ?? [];
                               setValue(
                                 fieldKey,
