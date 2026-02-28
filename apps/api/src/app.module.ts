@@ -10,6 +10,8 @@ import { SitesModule } from './sites/sites.module';
 import { EmployeesModule } from './employees/employees.module';
 import { LeavesModule } from './leaves/leaves.module';
 import { PublicHolidaysModule } from './public-holidays/public-holidays.module';
+import { CodesProduitsModule } from './codes-produits/codes-produits.module';
+import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { PublicHolidaysModule } from './public-holidays/public-holidays.module';
     EmployeesModule,
     LeavesModule,
     PublicHolidaysModule,
+    CodesProduitsModule,
+    CustomFieldsModule,
   ],
   controllers: [AppController],
 })
