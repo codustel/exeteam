@@ -25,13 +25,13 @@ const schema = z.object({
   projectId: z.string().min(1, 'Requis'),
   codeProduitId: z.string().min(1, 'Requis'),
   description: z.string().optional(),
-  status: z.string().default('a_traiter'),
-  priority: z.enum(['basse', 'normale', 'haute', 'urgente']).default('normale'),
+  status: z.string().min(1),
+  priority: z.enum(['basse', 'normale', 'haute', 'urgente']),
   dateReception: z.string().optional(),
   plannedStartDate: z.string().optional(),
   plannedEndDate: z.string().optional(),
   estimatedHours: z.coerce.number().nonnegative().optional(),
-  facturable: z.boolean().default(true),
+  facturable: z.boolean(),
 });
 
 type FormValues = z.infer<typeof schema>;

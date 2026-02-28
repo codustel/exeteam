@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import Gantt from 'frappe-gantt';
-import 'frappe-gantt/dist/frappe-gantt.css';
+import '@/styles/frappe-gantt.css';
 
 interface GanttTask {
   id: string;
@@ -34,13 +34,6 @@ export default function GanttWrapper({ tasks }: Props) {
       view_mode: 'Week',
       date_format: 'YYYY-MM-DD',
       language: 'fr',
-      custom_popup_html: (task: GanttTask) => `
-        <div class="p-2 text-sm">
-          <strong>${task.name}</strong><br/>
-          ${task.start} → ${task.end}<br/>
-          Avancement: ${task.progress}%
-        </div>
-      `,
     });
 
     return () => {
