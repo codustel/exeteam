@@ -15,23 +15,23 @@ export class CodesProduitsController {
 
   @Get()
   @RequirePermissions('clients.read')
-  findAll(@Query() dto: ListCodesProduitsDto) { return this.codesProduitsService.findAll(dto); }
+  findAll(@Query() dto: ListCodesProduitsDto): Promise<any> { return this.codesProduitsService.findAll(dto); }
 
   @Get(':id')
   @RequirePermissions('clients.read')
-  findOne(@Param('id') id: string) { return this.codesProduitsService.findOne(id); }
+  findOne(@Param('id') id: string): Promise<any> { return this.codesProduitsService.findOne(id); }
 
   @Post()
   @RequirePermissions('clients.create')
-  create(@Body() dto: CreateCodeProduitDto) { return this.codesProduitsService.create(dto); }
+  create(@Body() dto: CreateCodeProduitDto): Promise<any> { return this.codesProduitsService.create(dto); }
 
   @Patch(':id')
   @RequirePermissions('clients.update')
-  update(@Param('id') id: string, @Body() dto: UpdateCodeProduitDto) {
+  update(@Param('id') id: string, @Body() dto: UpdateCodeProduitDto): Promise<any> {
     return this.codesProduitsService.update(id, dto);
   }
 
   @Delete(':id')
   @RequirePermissions('clients.delete')
-  remove(@Param('id') id: string) { return this.codesProduitsService.remove(id); }
+  remove(@Param('id') id: string): Promise<any> { return this.codesProduitsService.remove(id); }
 }

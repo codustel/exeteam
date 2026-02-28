@@ -7,7 +7,7 @@ import { ListCodesProduitsDto } from './dto/list-codes-produits.dto';
 export class CodesProduitsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(dto: ListCodesProduitsDto) {
+  async findAll(dto: ListCodesProduitsDto): Promise<any> {
     const { page, limit, search, clientId, productType, isActive } = dto;
     const skip = (page - 1) * limit;
 
@@ -41,7 +41,7 @@ export class CodesProduitsService {
     return { data, total, page, limit, pages: Math.ceil(total / limit) };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<any> {
     const item = await this.prisma.codeProduit.findUnique({
       where: { id },
       include: {
@@ -54,7 +54,7 @@ export class CodesProduitsService {
     return item;
   }
 
-  async create(dto: CreateCodeProduitDto) {
+  async create(dto: CreateCodeProduitDto): Promise<any> {
     const existing = await this.prisma.codeProduit.findUnique({ where: { code: dto.code } });
     if (existing) throw new ConflictException(`Code "${dto.code}" already exists`);
     return this.prisma.codeProduit.create({
@@ -63,12 +63,12 @@ export class CodesProduitsService {
     });
   }
 
-  async update(id: string, dto: UpdateCodeProduitDto) {
+  async update(id: string, dto: UpdateCodeProduitDto): Promise<any> {
     await this.findOne(id);
     return this.prisma.codeProduit.update({ where: { id }, data: dto });
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<any> {
     await this.findOne(id);
     return this.prisma.codeProduit.update({ where: { id }, data: { isActive: false } });
   }
