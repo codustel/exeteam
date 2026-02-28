@@ -35,6 +35,8 @@ const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
   boolean: 'Oui/Non',
   select: 'Liste déroulante',
   multiselect: 'Sélection multiple',
+  url: 'URL',
+  gps: 'GPS',
 };
 
 interface Props {

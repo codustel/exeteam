@@ -7,7 +7,7 @@ import { ListSitesDto } from './dto/list-sites.dto';
 export class SitesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(dto: ListSitesDto) {
+  async findAll(dto: ListSitesDto): Promise<any> {
     const { page, limit, search, clientId, operatorId, typologieId, commune, departement, isActive } = dto;
     const skip = (page - 1) * limit;
 
@@ -48,14 +48,13 @@ export class SitesService {
     return { data, total, page, limit, pages: Math.ceil(total / limit) };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<any> {
     const site = await this.prisma.site.findUnique({
       where: { id, deletedAt: null },
       include: {
         client: {
           select: {
             id: true, name: true, logoUrl: true,
-            // Include custom fields config for rendering
             customFieldsConfig: true,
           },
         },
@@ -78,14 +77,14 @@ export class SitesService {
     return site;
   }
 
-  async create(dto: CreateSiteDto) {
+  async create(dto: CreateSiteDto): Promise<any> {
     const existing = await this.prisma.site.findUnique({
       where: { clientId_reference: { clientId: dto.clientId, reference: dto.reference } },
     });
     if (existing) throw new ConflictException(`Site with reference "${dto.reference}" already exists for this client`);
 
     return this.prisma.site.create({
-      data: dto,
+      data: dto as any,
       include: {
         client: { select: { id: true, name: true } },
         operator: { select: { id: true, name: true } },
@@ -94,11 +93,11 @@ export class SitesService {
     });
   }
 
-  async update(id: string, dto: UpdateSiteDto) {
+  async update(id: string, dto: UpdateSiteDto): Promise<any> {
     await this.findOne(id);
     return this.prisma.site.update({
       where: { id },
-      data: dto,
+      data: dto as any,
       include: {
         client: { select: { id: true, name: true } },
         operator: { select: { id: true, name: true } },
@@ -107,7 +106,7 @@ export class SitesService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<any> {
     await this.findOne(id);
     return this.prisma.site.update({
       where: { id },
@@ -115,14 +114,14 @@ export class SitesService {
     });
   }
 
-  async getTypologies() {
+  async getTypologies(): Promise<any> {
     return this.prisma.siteTypology.findMany({
       where: { isActive: true },
       orderBy: { order: 'asc' },
     });
   }
 
-  async getStats() {
+  async getStats(): Promise<any> {
     const [total, active, withActiveTasks] = await Promise.all([
       this.prisma.site.count({ where: { deletedAt: null } }),
       this.prisma.site.count({ where: { deletedAt: null, isActive: true } }),
