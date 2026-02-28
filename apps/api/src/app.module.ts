@@ -21,6 +21,7 @@ import { TagsModule } from './tags/tags.module';
 import { DemandsModule } from './demands/demands.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PushModule } from './push/push.module';
+import { CommercialModule } from './commercial/commercial.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { PushModule } from './push/push.module';
     DemandsModule,
     NotificationsModule,
     PushModule,
+    CommercialModule,
   ],
   controllers: [AppController],
 })
