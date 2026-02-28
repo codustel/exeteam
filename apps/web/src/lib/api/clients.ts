@@ -6,6 +6,13 @@ export interface ClientListItem {
   legalName: string | null;
   logoUrl: string | null;
   city: string | null;
+  postalCode: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  siret: string | null;
   country: string | null;
   isActive: boolean;
   operators: Array<{ operator: { id: string; name: string; logoUrl: string | null } }>;
