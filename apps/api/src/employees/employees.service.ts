@@ -7,9 +7,10 @@ import { ListEmployeesDto } from './dto/list-employees.dto';
 export class EmployeesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(dto: ListEmployeesDto) {
+  async findAll(dto: ListEmployeesDto): Promise<unknown> {
     const { page, limit, search, departmentId, contractType, managerId, isActive } = dto;
     const skip = (page - 1) * limit;
+
     const where = {
       deletedAt: null,
       ...(isActive !== undefined ? { isActive } : {}),
@@ -25,9 +26,12 @@ export class EmployeesService {
         ],
       } : {}),
     };
+
     const [data, total] = await Promise.all([
       this.prisma.employee.findMany({
-        where, skip, take: limit,
+        where,
+        skip,
+        take: limit,
         include: {
           department: { select: { id: true, name: true } },
           manager: { select: { id: true, firstName: true, lastName: true } },
@@ -38,10 +42,11 @@ export class EmployeesService {
       }),
       this.prisma.employee.count({ where }),
     ]);
+
     return { data, total, page, limit, pages: Math.ceil(total / limit) };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<unknown> {
     const employee = await this.prisma.employee.findUnique({
       where: { id, deletedAt: null },
       include: {
@@ -60,7 +65,7 @@ export class EmployeesService {
     return employee;
   }
 
-  async create(dto: CreateEmployeeDto) {
+  async create(dto: CreateEmployeeDto): Promise<unknown> {
     return this.prisma.employee.create({
       data: dto,
       include: {
@@ -70,17 +75,20 @@ export class EmployeesService {
     });
   }
 
-  async update(id: string, dto: UpdateEmployeeDto) {
+  async update(id: string, dto: UpdateEmployeeDto): Promise<unknown> {
     await this.findOne(id);
     return this.prisma.employee.update({ where: { id }, data: dto });
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<unknown> {
     await this.findOne(id);
-    return this.prisma.employee.update({ where: { id }, data: { deletedAt: new Date(), isActive: false } });
+    return this.prisma.employee.update({
+      where: { id },
+      data: { deletedAt: new Date(), isActive: false },
+    });
   }
 
-  async getOrgChart() {
+  async getOrgChart(): Promise<unknown> {
     return this.prisma.employee.findMany({
       where: { deletedAt: null, isActive: true },
       select: {
@@ -92,41 +100,56 @@ export class EmployeesService {
     });
   }
 
-  async getStats() {
+  async getStats(): Promise<unknown> {
     const [total, active, onLeave] = await Promise.all([
       this.prisma.employee.count({ where: { deletedAt: null } }),
       this.prisma.employee.count({ where: { deletedAt: null, isActive: true } }),
       this.prisma.leaveRequest.count({
-        where: { status: 'approuve', startDate: { lte: new Date() }, endDate: { gte: new Date() } },
+        where: {
+          status: 'approuve',
+          startDate: { lte: new Date() },
+          endDate: { gte: new Date() },
+        },
       }),
     ]);
+
     const tasksInProgress = await this.prisma.task.count({
       where: { status: 'en_cours', deletedAt: null, employeeId: { not: null } },
     });
+
     return {
-      total, active, inactive: total - active, onLeave, tasksInProgress,
+      total,
+      active,
+      inactive: total - active,
+      onLeave,
+      tasksInProgress,
       avgTasksPerEmployee: active > 0 ? (tasksInProgress / active).toFixed(1) : '0',
     };
   }
 
-  async getDepartments() {
+  async getDepartments(): Promise<unknown> {
     return this.prisma.department.findMany({ orderBy: { name: 'asc' } });
   }
 
-  async createDepartment(name: string) {
+  async createDepartment(name: string): Promise<unknown> {
     return this.prisma.department.create({ data: { name } });
   }
 
-  async updateSalary(id: string, grossSalary: number, netSalary: number, currencyId?: string) {
+  async updateSalary(id: string, grossSalary: number, netSalary: number, currencyId?: string): Promise<unknown> {
     await this.findOne(id);
-    await this.prisma.salary.create({ data: { employeeId: id, grossSalary, netSalary, effectiveDate: new Date() } });
+    await this.prisma.salary.create({
+      data: { employeeId: id, grossSalary, netSalary, effectiveDate: new Date() },
+    });
     return this.prisma.employee.update({
       where: { id },
       data: { grossSalary, netSalary, ...(currencyId ? { currencyId } : {}) },
     });
   }
 
-  async getSalaryHistory(employeeId: string) {
-    return this.prisma.salary.findMany({ where: { employeeId }, orderBy: { effectiveDate: 'desc' } });
+  async getSalaryHistory(employeeId: string): Promise<unknown> {
+    return this.prisma.salary.findMany({
+      where: { employeeId },
+      orderBy: { effectiveDate: 'desc' },
+    });
   }
 }
