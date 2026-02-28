@@ -25,14 +25,14 @@ Sprint 0 (Foundation)
 |--------|-----------|--------|
 | Sprint 0 | `2026-02-28-sprint-0-foundation.md` | Ready |
 | Sprint 1 | `2026-02-28-sprint-1-auth-rbac.md` | Ready |
-| Sprint 2A | `2026-02-28-sprint-2a-clients.md` | To create |
-| Sprint 2B | `2026-02-28-sprint-2b-sites.md` | To create |
-| Sprint 2C | `2026-02-28-sprint-2c-custom-fields.md` | To create |
-| Sprint 2D | `2026-02-28-sprint-2d-rh-conges.md` | To create |
-| Sprint 3A | `2026-02-28-sprint-3a-projects-tasks.md` | To create |
-| Sprint 3B | `2026-02-28-sprint-3b-demands.md` | To create |
-| Sprint 3C | `2026-02-28-sprint-3c-commercial.md` | To create |
-| Sprint 3D | `2026-02-28-sprint-3d-messaging.md` | To create |
+| Sprint 2A | `2026-02-28-sprint-2a-clients.md` | Ready |
+| Sprint 2B | `2026-02-28-sprint-2b-sites.md` | Ready |
+| Sprint 2C | `2026-02-28-sprint-2c-custom-fields.md` | Ready |
+| Sprint 2D | `2026-02-28-sprint-2d-rh-conges.md` | Ready |
+| Sprint 3A | `2026-02-28-sprint-3a-projects-tasks.md` | Ready |
+| Sprint 3B | `2026-02-28-sprint-3b-demands.md` | Ready |
+| Sprint 3C | `2026-02-28-sprint-3c-commercial.md` | Ready |
+| Sprint 3D | `2026-02-28-sprint-3d-messaging.md` | Ready |
 | Sprint 4A | `2026-02-28-sprint-4a-accounting.md` | To create |
 | Sprint 4B | `2026-02-28-sprint-4b-import.md` | To create |
 | Sprint 4C | `2026-02-28-sprint-4c-dashboards.md` | To create |
