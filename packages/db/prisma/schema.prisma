@@ -191,6 +191,7 @@ model LeaveType {
 
   leaveRequests LeaveRequest[]
 
+  @@unique([name])
   @@map("leave_types")
 }
 

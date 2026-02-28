@@ -10,10 +10,7 @@ export class PublicHolidaysController {
   constructor(private publicHolidaysService: PublicHolidaysService) {}
 
   @Get()
-  findAll(
-    @Query('year') year?: string,
-    @Query('country') country?: string,
-  ) {
+  findAll(@Query('year') year?: string, @Query('country') country?: string) {
     const y = year ? parseInt(year, 10) : new Date().getFullYear();
     return this.publicHolidaysService.findAll(y, country ?? 'FR');
   }
@@ -21,10 +18,7 @@ export class PublicHolidaysController {
   @Post('sync/:year')
   @UseGuards(RolesGuard)
   @Roles('super_admin', 'gerant')
-  syncYear(
-    @Param('year') year: string,
-    @Query('country') country?: string,
-  ) {
+  syncYear(@Param('year') year: string, @Query('country') country?: string) {
     return this.publicHolidaysService.syncFromNager(parseInt(year, 10), country ?? 'FR');
   }
 }

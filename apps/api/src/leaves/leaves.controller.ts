@@ -1,6 +1,4 @@
-import {
-  Controller, Get, Post, Patch, Param, Body, Query, UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { LeavesService } from './leaves.service';
 import { CreateLeaveDto, ApproveLeaveDto } from './dto/create-leave.dto';
 import { ListLeavesDto } from './dto/list-leaves.dto';
@@ -15,55 +13,37 @@ import type { AuthUser } from '../auth/supabase.strategy';
 export class LeavesController {
   constructor(private leavesService: LeavesService) {}
 
-  @Get('types')
-  @RequirePermissions('leaves.read')
-  getLeaveTypes() { return this.leavesService.getLeaveTypes(); }
+  @Get('types') @RequirePermissions('leaves.read')
+  getLeaveTypes(): Promise<unknown> { return this.leavesService.getLeaveTypes(); }
 
-  @Post('types')
-  @RequirePermissions('leaves.approve')
+  @Post('types') @RequirePermissions('leaves.approve')
   createLeaveType(
     @Body('name') name: string,
     @Body('daysPerYear') daysPerYear?: number,
     @Body('isCarryOver') isCarryOver?: boolean,
-  ) {
-    return this.leavesService.createLeaveType(name, daysPerYear, isCarryOver);
-  }
+  ): Promise<unknown> { return this.leavesService.createLeaveType(name, daysPerYear, isCarryOver); }
 
-  @Get()
-  @RequirePermissions('leaves.read')
-  findAll(@Query() dto: ListLeavesDto) { return this.leavesService.findAll(dto); }
+  @Get() @RequirePermissions('leaves.read')
+  findAll(@Query() dto: ListLeavesDto): Promise<unknown> { return this.leavesService.findAll(dto); }
 
-  @Get(':id')
-  @RequirePermissions('leaves.read')
-  findOne(@Param('id') id: string) { return this.leavesService.findOne(id); }
+  @Get(':id') @RequirePermissions('leaves.read')
+  findOne(@Param('id') id: string): Promise<unknown> { return this.leavesService.findOne(id); }
 
-  @Post()
-  @RequirePermissions('leaves.create')
-  create(@Body() dto: CreateLeaveDto) { return this.leavesService.create(dto); }
+  @Post() @RequirePermissions('leaves.create')
+  create(@Body() dto: CreateLeaveDto): Promise<unknown> { return this.leavesService.create(dto); }
 
-  @Patch(':id/approve')
-  @RequirePermissions('leaves.approve')
-  approve(
-    @Param('id') id: string,
-    @CurrentUser() user: AuthUser,
-    @Body() dto: ApproveLeaveDto,
-  ) {
+  @Patch(':id/approve') @RequirePermissions('leaves.approve')
+  approve(@Param('id') id: string, @CurrentUser() user: AuthUser, @Body() dto: ApproveLeaveDto): Promise<unknown> {
     return this.leavesService.approve(id, user.employeeId!, dto);
   }
 
-  @Patch(':id/refuse')
-  @RequirePermissions('leaves.approve')
-  refuse(
-    @Param('id') id: string,
-    @CurrentUser() user: AuthUser,
-    @Body() dto: ApproveLeaveDto,
-  ) {
+  @Patch(':id/refuse') @RequirePermissions('leaves.approve')
+  refuse(@Param('id') id: string, @CurrentUser() user: AuthUser, @Body() dto: ApproveLeaveDto): Promise<unknown> {
     return this.leavesService.refuse(id, user.employeeId!, dto);
   }
 
-  @Patch(':id/cancel')
-  @RequirePermissions('leaves.create')
-  cancel(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+  @Patch(':id/cancel') @RequirePermissions('leaves.create')
+  cancel(@Param('id') id: string, @CurrentUser() user: AuthUser): Promise<unknown> {
     return this.leavesService.cancel(id, user.employeeId!);
   }
 }
