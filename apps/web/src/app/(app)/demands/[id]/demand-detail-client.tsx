@@ -285,7 +285,6 @@ export function DemandDetailClient({ id }: { id: string }) {
                   <div>
                     <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Assigné à</p>
                     <p className="font-medium">{demand.employee.firstName} {demand.employee.lastName}</p>
-                    <p className="text-xs text-muted-foreground">{demand.employee.email}</p>
                   </div>
                 </>
               )}

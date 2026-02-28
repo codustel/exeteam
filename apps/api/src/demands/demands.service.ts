@@ -82,11 +82,11 @@ export class DemandsService {
         orderBy: { createdAt: 'desc' },
         include: {
           client: { select: { id: true, name: true } },
-          project: { select: { id: true, name: true, reference: true } },
+          project: { select: { id: true, title: true, reference: true } },
           site: { select: { id: true, name: true } },
           demandeur: { select: { id: true, firstName: true, lastName: true, email: true } },
           employee: { select: { id: true, firstName: true, lastName: true } },
-          codeProduit: { select: { id: true, code: true, label: true } },
+          codeProduit: { select: { id: true, code: true, designation: true } },
           task: { select: { id: true, reference: true, title: true, status: true } },
         },
       }),
@@ -128,11 +128,11 @@ export class DemandsService {
       where: { id, deletedAt: null },
       include: {
         client: { select: { id: true, name: true, logoUrl: true } },
-        project: { select: { id: true, name: true, reference: true } },
+        project: { select: { id: true, title: true, reference: true } },
         site: { select: { id: true, name: true, address: true } },
         demandeur: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } },
-        employee: { select: { id: true, firstName: true, lastName: true, email: true } },
-        codeProduit: { select: { id: true, code: true, label: true } },
+        employee: { select: { id: true, firstName: true, lastName: true, professionalEmail: true } },
+        codeProduit: { select: { id: true, code: true, designation: true } },
         createdBy: { select: { id: true, email: true } },
         task: {
           select: {
@@ -175,7 +175,7 @@ export class DemandsService {
       },
       include: {
         client: { select: { id: true, name: true } },
-        project: { select: { id: true, name: true } },
+        project: { select: { id: true, title: true } },
       },
     });
 
@@ -213,7 +213,7 @@ export class DemandsService {
       },
       include: {
         client: { select: { id: true, name: true } },
-        project: { select: { id: true, name: true } },
+        project: { select: { id: true, title: true } },
         site: { select: { id: true, name: true } },
         demandeur: { select: { id: true, firstName: true, lastName: true } },
         employee: { select: { id: true, firstName: true, lastName: true } },
@@ -238,9 +238,15 @@ export class DemandsService {
       );
     }
 
-    if (demand.task) {
+    // Check if a task already exists for this demand
+    const existingTask = await this.prisma.task.findUnique({
+      where: { demandId: id },
+      select: { id: true, reference: true },
+    });
+
+    if (existingTask) {
       throw new BadRequestException(
-        `Demand ${demand.reference} already has a linked task (${demand.task.reference}).`,
+        `Demand ${demand.reference} already has a linked task (${existingTask.reference}).`,
       );
     }
 
@@ -263,7 +269,7 @@ export class DemandsService {
           priority: demand.priority,
         },
         include: {
-          project: { select: { id: true, name: true } },
+          project: { select: { id: true, title: true } },
           employee: { select: { id: true, firstName: true, lastName: true } },
         },
       });
@@ -278,9 +284,9 @@ export class DemandsService {
 
     // Notify assigned employee if present
     if (demand.employeeId) {
-      // Find the user account linked to this employee
+      // Find the user account linked to this employee via the employee relation
       const employeeUser = await this.prisma.user.findFirst({
-        where: { employeeId: demand.employeeId, deletedAt: null },
+        where: { employee: { id: demand.employeeId }, deletedAt: null },
         select: { id: true },
       });
 
