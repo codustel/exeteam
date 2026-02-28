@@ -18,34 +18,34 @@ export class ClientsController {
 
   @Get('stats')
   @RequirePermissions('clients.read')
-  getStats() { return this.clientsService.getStats(); }
+  getStats(): Promise<unknown> { return this.clientsService.getStats(); }
 
   @Get()
   @RequirePermissions('clients.read')
-  findAll(@Query() dto: ListClientsDto) { return this.clientsService.findAll(dto); }
+  findAll(@Query() dto: ListClientsDto): Promise<unknown> { return this.clientsService.findAll(dto); }
 
   @Get(':id')
   @RequirePermissions('clients.read')
-  findOne(@Param('id') id: string) { return this.clientsService.findOne(id); }
+  findOne(@Param('id') id: string): Promise<unknown> { return this.clientsService.findOne(id); }
 
   @Post()
   @RequirePermissions('clients.create')
-  create(@Body() dto: CreateClientDto) { return this.clientsService.create(dto); }
+  create(@Body() dto: CreateClientDto): Promise<unknown> { return this.clientsService.create(dto); }
 
   @Patch(':id')
   @RequirePermissions('clients.update')
-  update(@Param('id') id: string, @Body() dto: UpdateClientDto) {
+  update(@Param('id') id: string, @Body() dto: UpdateClientDto): Promise<unknown> {
     return this.clientsService.update(id, dto);
   }
 
   @Delete(':id')
   @RequirePermissions('clients.delete')
-  remove(@Param('id') id: string) { return this.clientsService.remove(id); }
+  remove(@Param('id') id: string): Promise<unknown> { return this.clientsService.remove(id); }
 
   @Post(':id/logo')
   @RequirePermissions('clients.update')
   @UseInterceptors(FileInterceptor('file'))
-  uploadLogo(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+  uploadLogo(@Param('id') id: string, @UploadedFile() file: Express.Multer.File): Promise<unknown> {
     // Logo upload is handled client-side via Supabase Storage signed URL
     // This endpoint receives the public URL after upload and stores it
     return this.clientsService.updateLogo(id, file.originalname);
@@ -53,7 +53,7 @@ export class ClientsController {
 
   @Patch(':id/logo-url')
   @RequirePermissions('clients.update')
-  updateLogoUrl(@Param('id') id: string, @Body('logoUrl') logoUrl: string) {
+  updateLogoUrl(@Param('id') id: string, @Body('logoUrl') logoUrl: string): Promise<unknown> {
     return this.clientsService.updateLogo(id, logoUrl);
   }
 }

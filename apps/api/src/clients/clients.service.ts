@@ -8,7 +8,7 @@ import { ListClientsDto } from './dto/list-clients.dto';
 export class ClientsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(dto: ListClientsDto) {
+  async findAll(dto: ListClientsDto): Promise<unknown> {
     const { page, limit, search, isActive, operatorId, tagId } = dto;
     const skip = (page - 1) * limit;
 
@@ -45,7 +45,7 @@ export class ClientsService {
     return { data, total, page, limit, pages: Math.ceil(total / limit) };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<unknown> {
     const client = await this.prisma.client.findUnique({
       where: { id, deletedAt: null },
       include: {
@@ -60,7 +60,7 @@ export class ClientsService {
     return client;
   }
 
-  async create(dto: CreateClientDto) {
+  async create(dto: CreateClientDto): Promise<unknown> {
     const { tagIds, operatorIds, ...data } = dto;
     return this.prisma.client.create({
       data: {
@@ -83,7 +83,7 @@ export class ClientsService {
     });
   }
 
-  async update(id: string, dto: UpdateClientDto) {
+  async update(id: string, dto: UpdateClientDto): Promise<unknown> {
     await this.findOne(id);
     const { tagIds, operatorIds, ...data } = dto;
 
@@ -115,7 +115,7 @@ export class ClientsService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<unknown> {
     await this.findOne(id);
     return this.prisma.client.update({
       where: { id },
@@ -123,12 +123,12 @@ export class ClientsService {
     });
   }
 
-  async updateLogo(id: string, logoUrl: string) {
+  async updateLogo(id: string, logoUrl: string): Promise<unknown> {
     await this.findOne(id);
     return this.prisma.client.update({ where: { id }, data: { logoUrl } });
   }
 
-  async getStats() {
+  async getStats(): Promise<unknown> {
     const [total, active, withProjects] = await Promise.all([
       this.prisma.client.count({ where: { deletedAt: null } }),
       this.prisma.client.count({ where: { deletedAt: null, isActive: true } }),
