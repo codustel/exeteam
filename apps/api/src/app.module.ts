@@ -18,6 +18,9 @@ import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 import { OperatorsModule } from './operators/operators.module';
 import { InterlocuteursModule } from './interlocuteurs/interlocuteurs.module';
 import { TagsModule } from './tags/tags.module';
+import { DemandsModule } from './demands/demands.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { PushModule } from './push/push.module';
 
 @Module({
   imports: [
@@ -47,6 +50,9 @@ import { TagsModule } from './tags/tags.module';
     OperatorsModule,
     InterlocuteursModule,
     TagsModule,
+    DemandsModule,
+    NotificationsModule,
+    PushModule,
   ],
   controllers: [AppController],
 })
