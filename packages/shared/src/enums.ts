@@ -67,6 +67,7 @@ export const CUSTOM_FIELD_TYPE = {
   DATE: 'date',
   SELECT: 'select',
   BOOLEAN: 'boolean',
+  MULTISELECT: 'multiselect',
   URL: 'url',
   GPS: 'gps',
 } as const;

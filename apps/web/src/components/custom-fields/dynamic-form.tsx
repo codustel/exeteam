@@ -151,7 +151,7 @@ export function DynamicForm({ config, defaultValues, onSubmit, isLoading, readOn
                           <Checkbox
                             id={`${fieldKey}-${opt}`}
                             checked={selected}
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={(checked: boolean | "indeterminate") => {
                               const current = (currentValue as string[]) ?? [];
                               setValue(
                                 fieldKey,
