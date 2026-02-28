@@ -62,7 +62,7 @@ export function SitesTable() {
 
   return (
     <div className="space-y-4">
-      <StatsBar items={statsItems} />
+      <StatsBar stats={statsItems} />
 
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
