@@ -106,7 +106,7 @@ export function ClientDetail({ clientId }: Props) {
             <div className="space-y-3">
               <h3 className="font-semibold">Coordonnées</h3>
               <div className="space-y-1 text-sm">
-                {client.addressLine1 && <p>{client.addressLine1}</p>}
+                {(client as any).addressLine1 && <p>{(client as any).addressLine1}</p>}
                 {(client as any).addressLine2 && <p>{(client as any).addressLine2}</p>}
                 {(client.postalCode || client.city) && (
                   <p>{client.postalCode} {client.city}</p>
