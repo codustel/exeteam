@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -100,14 +101,27 @@ export class ProjectsService {
     const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
     const reference = `PROJ-${yyyymm}-${String(count + 1).padStart(4, '0')}`;
 
+    const createData: Prisma.ProjectCreateInput = {
+      title: data.title,
+      status: data.status ?? 'brouillon',
+      priority: data.priority ?? 'normale',
+      isActive: data.isActive ?? true,
+      reference,
+      client: { connect: { id: data.clientId } },
+      ...(data.description && { description: data.description }),
+      ...(data.responsibleId && { responsible: { connect: { id: data.responsibleId } } }),
+      ...(data.operatorId && { operator: { connect: { id: data.operatorId } } }),
+      ...(data.plannedStartDate && { plannedStartDate: data.plannedStartDate }),
+      ...(data.plannedEndDate && { plannedEndDate: data.plannedEndDate }),
+      ...(data.actualStartDate && { actualStartDate: data.actualStartDate }),
+      ...(data.actualEndDate && { actualEndDate: data.actualEndDate }),
+      ...(data.budgetHours !== undefined && { budgetHours: data.budgetHours }),
+      ...(data.customFieldsConfig && { customFieldsConfig: data.customFieldsConfig as Prisma.InputJsonValue }),
+      ...(tagIds?.length && { tags: { create: tagIds.map((tagId) => ({ tagId, entityType: 'project' })) } }),
+    };
+
     return this.prisma.project.create({
-      data: {
-        ...data,
-        reference,
-        ...(tagIds?.length
-          ? { tags: { create: tagIds.map((tagId) => ({ tagId, entityType: 'project' })) } }
-          : {}),
-      },
+      data: createData,
       include: {
         client: { select: { id: true, name: true } },
         operator: { select: { id: true, name: true } },
@@ -130,9 +144,25 @@ export class ProjectsService {
           });
         }
       }
+      const updateData: Prisma.ProjectUpdateInput = {
+        ...(data.title && { title: data.title }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.status && { status: data.status }),
+        ...(data.priority && { priority: data.priority }),
+        ...(data.isActive !== undefined && { isActive: data.isActive }),
+        ...(data.clientId && { client: { connect: { id: data.clientId } } }),
+        ...(data.responsibleId && { responsible: { connect: { id: data.responsibleId } } }),
+        ...(data.operatorId && { operator: { connect: { id: data.operatorId } } }),
+        ...(data.plannedStartDate && { plannedStartDate: data.plannedStartDate }),
+        ...(data.plannedEndDate && { plannedEndDate: data.plannedEndDate }),
+        ...(data.actualStartDate && { actualStartDate: data.actualStartDate }),
+        ...(data.actualEndDate && { actualEndDate: data.actualEndDate }),
+        ...(data.budgetHours !== undefined && { budgetHours: data.budgetHours }),
+        ...(data.customFieldsConfig && { customFieldsConfig: data.customFieldsConfig as Prisma.InputJsonValue }),
+      };
       return tx.project.update({
         where: { id },
-        data,
+        data: updateData,
         include: {
           client: { select: { id: true, name: true } },
           operator: { select: { id: true, name: true } },

@@ -15,7 +15,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
 import { Plus, Trash2, GripVertical, Loader2 } from 'lucide-react';
-type CustomFieldType = 'text' | 'number' | 'date' | 'boolean' | 'select' | 'multiselect';
+type CustomFieldType = 'text' | 'number' | 'date' | 'boolean' | 'select' | 'multiselect' | 'url' | 'gps';
 type CustomFieldsData = Record<string, string | number | boolean | string[] | null>;
 
 type CustomFieldConfig = {

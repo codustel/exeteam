@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -82,7 +83,6 @@ export class TasksService {
     actualEndDate?: Date | null;
     codeProduit?: { timeGamme?: unknown } | null;
     timeEntries?: Array<{ hours: unknown }>;
-    demand?: { quantity?: number } | null;
   }) {
     const delaiRL = await this.calcDelaiRL(
       task.dateReception ?? null,
@@ -96,8 +96,7 @@ export class TasksService {
     const timeGamme = task.codeProduit?.timeGamme
       ? Number(task.codeProduit.timeGamme)
       : null;
-    const quantity = task.demand?.quantity ?? 1;
-    const rendement = this.calcRendement(timeGamme, totalHours, quantity);
+    const rendement = this.calcRendement(timeGamme, totalHours, 1);
 
     return { ...task, delaiRL, rendement, totalHours };
   }
@@ -141,7 +140,7 @@ export class TasksService {
           employee: { select: { id: true, firstName: true, lastName: true } },
           codeProduit: { select: { id: true, code: true, designation: true, timeGamme: true } },
           timeEntries: { select: { hours: true } },
-          demand: { select: { quantity: true } },
+          demand: { select: { id: true } },
           _count: { select: { comments: true, deliverables: true } },
         },
       }),
@@ -161,7 +160,7 @@ export class TasksService {
         site: { select: { id: true, name: true } },
         employee: { select: { id: true, firstName: true, lastName: true } },
         codeProduit: { select: { id: true, code: true, designation: true, timeGamme: true } },
-        demand: { select: { id: true, quantity: true } },
+        demand: { select: { id: true } },
         timeEntries: {
           include: {
             employee: { select: { id: true, firstName: true, lastName: true } },
@@ -193,21 +192,24 @@ export class TasksService {
     const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
     const reference = `TACHE-${yyyymm}-${String(count + 1).padStart(4, '0')}`;
 
+    const createData = {
+      ...data,
+      reference,
+      dateLastStatus: new Date(),
+      ...(data.customFieldsData ? { customFieldsData: data.customFieldsData as Prisma.InputJsonValue } : {}),
+      ...(tagIds?.length
+        ? { tags: { create: tagIds.map((tagId) => ({ tagId, entityType: 'task' })) } }
+        : {}),
+    };
+
     const task = await this.prisma.task.create({
-      data: {
-        ...data,
-        reference,
-        dateLastStatus: new Date(),
-        ...(tagIds?.length
-          ? { tags: { create: tagIds.map((tagId) => ({ tagId, entityType: 'task' })) } }
-          : {}),
-      },
+      data: createData as Parameters<typeof this.prisma.task.create>[0]['data'],
       include: {
         project: { select: { id: true, title: true } },
         employee: { select: { id: true, firstName: true, lastName: true } },
         codeProduit: { select: { id: true, code: true, designation: true, timeGamme: true } },
         timeEntries: { select: { hours: true } },
-        demand: { select: { quantity: true } },
+        demand: { select: { id: true } },
       },
     });
 
@@ -244,6 +246,7 @@ export class TasksService {
 
       // Auto-create status history on status change
       const currentStatus = (existing as Record<string, unknown>)['status'] as string;
+      const updateData: Record<string, unknown> = { ...data };
       if (dto.status && dto.status !== currentStatus) {
         await tx.statusHistory.create({
           data: {
@@ -253,18 +256,18 @@ export class TasksService {
             newStatus: dto.status,
           },
         });
-        data['dateLastStatus'] = new Date();
+        updateData['dateLastStatus'] = new Date();
       }
 
       const updated = await tx.task.update({
         where: { id },
-        data,
+        data: updateData as Parameters<typeof tx.task.update>[0]['data'],
         include: {
           project: { select: { id: true, reference: true, title: true, customFieldsConfig: true } },
           site: { select: { id: true, name: true } },
           employee: { select: { id: true, firstName: true, lastName: true } },
           codeProduit: { select: { id: true, code: true, designation: true, timeGamme: true } },
-          demand: { select: { id: true, quantity: true } },
+          demand: { select: { id: true } },
           timeEntries: { select: { hours: true } },
           comments: {
             include: { author: { select: { id: true, email: true } } },
@@ -352,7 +355,6 @@ export class TasksService {
       include: {
         timeEntries: { select: { hours: true } },
         codeProduit: { select: { timeGamme: true } },
-        demand: { select: { quantity: true } },
       },
       take: 200,
     });
@@ -361,10 +363,9 @@ export class TasksService {
     if (tasksWithHours.length > 0) {
       const rendered = tasksWithHours
         .map((t) => {
-          const totalHours = t.timeEntries.reduce((s, e) => s + Number(e.hours), 0);
+          const totalHours = t.timeEntries.reduce((s: number, e) => s + Number(e.hours), 0);
           const tg = t.codeProduit?.timeGamme ? Number(t.codeProduit.timeGamme) : null;
-          const qty = t.demand?.quantity ?? 1;
-          return tg && totalHours > 0 ? (tg * qty) / totalHours * 100 : null;
+          return tg && totalHours > 0 ? tg / totalHours * 100 : null;
         })
         .filter((v): v is number => v !== null);
 

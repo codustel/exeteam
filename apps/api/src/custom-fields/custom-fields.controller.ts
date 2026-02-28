@@ -15,7 +15,7 @@ export class CustomFieldsController {
   getConfig(
     @Query('clientId') clientId: string,
     @Query('projectId') projectId?: string,
-  ) {
+  ): Promise<unknown> {
     return this.customFieldsService.getConfig(clientId, projectId);
   }
 
