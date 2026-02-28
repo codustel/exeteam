@@ -581,6 +581,7 @@ model Demand {
   desiredDelivery DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
 
   task Task?
 
