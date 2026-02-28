@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Moon, Sun, LogOut, User } from 'lucide-react';
+import { Moon, Sun, LogOut, User } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '../ui/button';
 import {
@@ -8,6 +8,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { logout } from '@/lib/auth/actions';
+import { NotificationBell } from '@/components/NotificationBell';
 
 interface HeaderProps {
   title?: string;
@@ -23,9 +24,7 @@ export function Header({ title }: HeaderProps) {
         <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
           {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
-        <Button variant="ghost" size="icon">
-          <Bell className="h-4 w-4" />
-        </Button>
+        <NotificationBell />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
