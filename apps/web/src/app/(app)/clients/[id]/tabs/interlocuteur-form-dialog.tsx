@@ -11,6 +11,9 @@ import {
 import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from '@/components/ui/form';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -20,7 +23,7 @@ const schema = z.object({
   lastName: z.string().min(1, 'Requis'),
   email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional(),
-  fonction: z.string().optional(),
+  fonction: z.enum(['chef_projet', 'charge_affaire', 'resp_be', 'autre']).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -37,14 +40,11 @@ export function InterlocuteurFormDialog({ open, onOpenChange, clientId }: Props)
 
   const mutation = useMutation({
     mutationFn: (data: FormValues) =>
-      apiRequest('/interlocuteurs', {
-        method: 'POST',
-        body: JSON.stringify({ ...data, clientId }),
-      }),
+      apiRequest('/interlocuteurs', { method: 'POST', body: JSON.stringify({ ...data, clientId }) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interlocuteurs', clientId] });
-      form.reset();
       onOpenChange(false);
+      form.reset();
     },
   });
 
@@ -52,7 +52,7 @@ export function InterlocuteurFormDialog({ open, onOpenChange, clientId }: Props)
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Ajouter un contact</DialogTitle>
+          <DialogTitle>Nouvel interlocuteur</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit((v) => mutation.mutate(v))} className="space-y-4">
@@ -72,13 +72,6 @@ export function InterlocuteurFormDialog({ open, onOpenChange, clientId }: Props)
                 </FormItem>
               )} />
             </div>
-            <FormField control={form.control} name="fonction" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fonction</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
             <FormField control={form.control} name="email" render={({ field }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
@@ -93,13 +86,28 @@ export function InterlocuteurFormDialog({ open, onOpenChange, clientId }: Props)
                 <FormMessage />
               </FormItem>
             )} />
+            <FormField control={form.control} name="fonction" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fonction</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="chef_projet">Chef de projet</SelectItem>
+                    <SelectItem value="charge_affaire">Chargé d&apos;affaires</SelectItem>
+                    <SelectItem value="resp_be">Resp. BE</SelectItem>
+                    <SelectItem value="autre">Autre</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )} />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Annuler
-              </Button>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
               <Button type="submit" disabled={mutation.isPending}>
                 {mutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Ajouter
+                Créer
               </Button>
             </DialogFooter>
           </form>
