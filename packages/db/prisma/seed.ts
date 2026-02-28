@@ -211,6 +211,25 @@ async function main() {
     },
   });
 
+  // Seed leave types
+  const leaveTypes = [
+    { name: 'Congés payés', daysPerYear: 25, isCarryOver: true },
+    { name: 'RTT', daysPerYear: 10, isCarryOver: false },
+    { name: 'Maladie', daysPerYear: null, isCarryOver: false },
+    { name: 'Exceptionnel familial', daysPerYear: null, isCarryOver: false },
+    { name: 'Formation', daysPerYear: null, isCarryOver: false },
+  ];
+  for (const lt of leaveTypes) {
+    await prisma.leaveType.upsert({
+      where: { name: lt.name },
+      update: lt,
+      create: lt,
+    });
+  }
+
+  // NOTE: Run POST /public-holidays/sync/2025?country=FR and /2026?country=FR after first deploy
+  // to populate public holidays from Nager.Date API.
+
   console.log('✅ Seed complete');
 }
 
