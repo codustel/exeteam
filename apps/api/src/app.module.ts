@@ -6,6 +6,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { SitesModule } from './sites/sites.module';
+import { EmployeesModule } from './employees/employees.module';
+import { LeavesModule } from './leaves/leaves.module';
+import { PublicHolidaysModule } from './public-holidays/public-holidays.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { SitesModule } from './sites/sites.module';
     AuthModule,
     UsersModule,
     SitesModule,
+    EmployeesModule,
+    LeavesModule,
+    PublicHolidaysModule,
   ],
   controllers: [AppController],
 })
