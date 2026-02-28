@@ -85,7 +85,7 @@ export class SitesService {
     if (existing) throw new ConflictException(`Site with reference "${dto.reference}" already exists for this client`);
 
     return this.prisma.site.create({
-      data: dto,
+      data: dto as any,
       include: {
         client: { select: { id: true, name: true } },
         operator: { select: { id: true, name: true } },
@@ -98,7 +98,7 @@ export class SitesService {
     await this.findOne(id);
     return this.prisma.site.update({
       where: { id },
-      data: dto,
+      data: dto as any,
       include: {
         client: { select: { id: true, name: true } },
         operator: { select: { id: true, name: true } },
