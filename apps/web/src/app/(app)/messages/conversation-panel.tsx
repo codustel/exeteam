@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { messagingApi, type Message } from '@/lib/api/messaging';
-import { useRealtimeMessages } from '@/hooks/use-realtime-messages';
+import { useRealtimeMessages, type RealtimeMessage } from '@/hooks/use-realtime-messages';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send, Paperclip, Users } from 'lucide-react';
@@ -38,10 +38,10 @@ export function ConversationPanel({ conversationId }: Props) {
   }, [initialMessages]);
 
   // Realtime: append new messages
-  const handleNewMessage = useCallback((msg: Message) => {
+  const handleNewMessage = useCallback((msg: RealtimeMessage) => {
     setMessages(prev => {
       if (prev.find(m => m.id === msg.id)) return prev;
-      return [...prev, msg];
+      return [...prev, msg as unknown as Message];
     });
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }, [queryClient]);
