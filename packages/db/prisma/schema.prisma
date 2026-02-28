@@ -1,0 +1,994 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// AUTH & RBAC
+// ============================================================
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  roleId        String
+  role          Role      @relation(fields: [roleId], references: [id])
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  employee      Employee?
+  interlocuteur Interlocuteur?
+
+  // Relations
+  taskComments   TaskComment[]
+  statusChanges  StatusHistory[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+  importLogs     ImportLog[]
+  messages       Message[]
+  createdDemands Demand[]       @relation("DemandCreatedBy")
+  timeEntries    TimeEntry[]
+
+  @@map("users")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id       String @id @default(uuid())
+  module   String
+  action   String
+  isMasked Boolean @default(false)
+
+  roles RolePermission[]
+
+  @@unique([module, action])
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ============================================================
+// EMPLOYEES & HR
+// ============================================================
+
+model Department {
+  id        String     @id @default(uuid())
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  employees Employee[]
+
+  @@map("departments")
+}
+
+model Employee {
+  id          String    @id @default(uuid())
+  userId      String?   @unique
+  user        User?     @relation(fields: [userId], references: [id])
+  managerId   String?
+  manager     Employee? @relation("Hierarchy", fields: [managerId], references: [id])
+  subordinates Employee[] @relation("Hierarchy")
+  departmentId String?
+  department  Department? @relation(fields: [departmentId], references: [id])
+
+  // Identity
+  firstName       String
+  lastName        String
+  dateOfBirth     DateTime?
+  nationality     String?
+  photoUrl        String?
+
+  // Contact
+  addressLine1    String?
+  addressLine2    String?
+  postalCode      String?
+  city            String?
+  country         String?
+  personalEmail   String?
+  professionalEmail String?
+  phone           String?
+
+  // Contract
+  contractType    String?   // cdi, cdd, stage, freelance, alternance
+  entryDate       DateTime?
+  endDate         DateTime?
+  trialEndDate    DateTime?
+  position        String?
+  weeklyHours     Decimal?  @db.Decimal(5, 2)
+
+  // Salary (encrypted via pgcrypto at app level)
+  grossSalary     Decimal?  @db.Decimal(10, 2)
+  netSalary       Decimal?  @db.Decimal(10, 2)
+  hourlyRate      Decimal?  @db.Decimal(8, 2)
+  currencyId      String?
+  currency        Currency? @relation(fields: [currencyId], references: [id])
+
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  // Relations
+  assignedTasks    Task[]        @relation("TaskAssignee")
+  timeEntries      TimeEntry[]
+  leaveRequests    LeaveRequest[]
+  leaveApprovals   LeaveRequest[] @relation("LeaveApprover")
+  expenseReports   ExpenseReport[]
+  expenseApprovals ExpenseReport[] @relation("ExpenseApprover")
+  salaryHistory    Salary[]
+  projects         Project[]      @relation("ProjectResponsible")
+  conversations    ConversationMember[]
+  demands          Demand[]
+
+  @@map("employees")
+}
+
+model Salary {
+  id          String   @id @default(uuid())
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  grossSalary Decimal  @db.Decimal(10, 2)
+  netSalary   Decimal? @db.Decimal(10, 2)
+  effectiveDate DateTime
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  @@map("salaries")
+}
+
+model Recruitment {
+  id          String   @id @default(uuid())
+  position    String
+  status      String   @default("open") // open, in_progress, closed, cancelled
+  priority    String   @default("normale")
+  description String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("recruitments")
+}
+
+// ============================================================
+// LEAVE & PUBLIC HOLIDAYS
+// ============================================================
+
+model LeaveType {
+  id            String   @id @default(uuid())
+  name          String
+  daysPerYear   Decimal? @db.Decimal(5, 2)
+  isCarryOver   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  leaveRequests LeaveRequest[]
+
+  @@map("leave_types")
+}
+
+model LeaveRequest {
+  id          String    @id @default(uuid())
+  employeeId  String
+  employee    Employee  @relation(fields: [employeeId], references: [id])
+  approverId  String?
+  approver    Employee? @relation("LeaveApprover", fields: [approverId], references: [id])
+  leaveTypeId String
+  leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id])
+  startDate   DateTime
+  endDate     DateTime
+  days        Decimal   @db.Decimal(4, 1)
+  status      String    @default("en_attente")
+  reason      String?
+  comment     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("leave_requests")
+}
+
+model PublicHoliday {
+  id        String   @id @default(uuid())
+  date      DateTime @db.Date
+  label     String
+  type      String   @default("national")
+  country   String   @default("FR")
+  year      Int
+
+  @@unique([date, country])
+  @@map("public_holidays")
+}
+
+model WorkSchedule {
+  id           String   @id @default(uuid())
+  contractType String   @unique
+  mondayHours  Decimal  @db.Decimal(4, 2) @default(8)
+  tuesdayHours Decimal  @db.Decimal(4, 2) @default(8)
+  wednesdayHours Decimal @db.Decimal(4, 2) @default(8)
+  thursdayHours Decimal @db.Decimal(4, 2) @default(8)
+  fridayHours  Decimal  @db.Decimal(4, 2) @default(8)
+  saturdayHours Decimal @db.Decimal(4, 2) @default(0)
+  sundayHours  Decimal  @db.Decimal(4, 2) @default(0)
+  weeklyHours  Decimal  @db.Decimal(5, 2) @default(40)
+
+  @@map("work_schedules")
+}
+
+// ============================================================
+// CLIENTS, OPERATORS, INTERLOCUTEURS
+// ============================================================
+
+model Client {
+  id                  String   @id @default(uuid())
+  name                String
+  legalName           String?
+  logoUrl             String?
+  addressLine1        String?
+  addressLine2        String?
+  postalCode          String?
+  city                String?
+  country             String?
+  vatNumber           String?
+  siret               String?
+  email               String?
+  phone               String?
+  paymentConditions   String?
+  defaultVatRate      Decimal? @db.Decimal(5, 2)
+  notes               String?
+  customFieldsConfig  Json?    @db.JsonB
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  deletedAt           DateTime?
+
+  // Relations
+  interlocuteurs Interlocuteur[]
+  projects       Project[]
+  codesProduits  CodeProduit[]
+  sites          Site[]
+  quotes         Quote[]
+  orders         Order[]
+  invoices       Invoice[]
+  attachments    Attachment[]
+  demands        Demand[]
+  tags           EntityTag[]    @relation("ClientTags")
+  operators      ClientOperator[]
+
+  @@map("clients")
+}
+
+model Operator {
+  id          String   @id @default(uuid())
+  name        String
+  logoUrl     String?
+  description String?
+  contact     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projects Project[]
+  sites    Site[]
+  clients  ClientOperator[]
+
+  @@map("operators")
+}
+
+model ClientOperator {
+  clientId   String
+  operatorId String
+  client     Client   @relation(fields: [clientId], references: [id])
+  operator   Operator @relation(fields: [operatorId], references: [id])
+
+  @@id([clientId, operatorId])
+  @@map("client_operators")
+}
+
+model Interlocuteur {
+  id        String   @id @default(uuid())
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id])
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id])
+
+  firstName  String
+  lastName   String
+  email      String?
+  phone      String?
+  fonction   String?  // chef_projet, charge_affaire, resp_be, autre
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+
+  projectContacts Project[] @relation("ProjectContact")
+  demands         Demand[]
+
+  @@map("interlocuteurs")
+}
+
+// ============================================================
+// SITES
+// ============================================================
+
+model SiteTypology {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  sites Site[]
+
+  @@map("site_typologies")
+}
+
+model Site {
+  id               String        @id @default(uuid())
+  reference        String
+  name             String
+  address          String?
+  postalCode       String?
+  commune          String?
+  departement      String?
+  country          String        @default("FR")
+  latitude         Decimal?      @db.Decimal(10, 7)
+  longitude        Decimal?      @db.Decimal(10, 7)
+  typologieId      String?
+  typologie        SiteTypology? @relation(fields: [typologieId], references: [id])
+  clientId         String
+  client           Client        @relation(fields: [clientId], references: [id])
+  operatorId       String?
+  operator         Operator?     @relation(fields: [operatorId], references: [id])
+  customFieldsData Json?         @db.JsonB
+  isActive         Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?
+
+  tasks   Task[]
+  demands Demand[]
+
+  @@unique([clientId, reference])
+  @@map("sites")
+}
+
+// ============================================================
+// PROJECTS & TASKS
+// ============================================================
+
+model Project {
+  id                  String    @id @default(uuid())
+  reference           String    @unique
+  title               String
+  description         String?
+  clientId            String
+  client              Client    @relation(fields: [clientId], references: [id])
+  operatorId          String?
+  operator            Operator? @relation(fields: [operatorId], references: [id])
+  responsibleId       String?
+  responsible         Employee? @relation("ProjectResponsible", fields: [responsibleId], references: [id])
+  contactId           String?
+  contact             Interlocuteur? @relation("ProjectContact", fields: [contactId], references: [id])
+  status              String    @default("brouillon")
+  priority            String    @default("normale")
+  plannedStartDate    DateTime?
+  plannedEndDate      DateTime?
+  actualStartDate     DateTime?
+  actualEndDate       DateTime?
+  budgetHours         Decimal?  @db.Decimal(8, 2)
+  customFieldsConfig  Json?     @db.JsonB
+  isActive            Boolean   @default(true)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  deletedAt           DateTime?
+
+  tasks       Task[]
+  demands     Demand[]
+  attachments Attachment[]
+  quotes      Quote[]
+  tags        EntityTag[]  @relation("ProjectTags")
+
+  @@map("projects")
+}
+
+model Task {
+  id                String    @id @default(uuid())
+  reference         String    @unique
+  title             String
+  description       String?
+  projectId         String
+  project           Project   @relation(fields: [projectId], references: [id])
+  siteId            String?
+  site              Site?     @relation(fields: [siteId], references: [id])
+  codeProduitId     String
+  codeProduit       CodeProduit @relation(fields: [codeProduitId], references: [id])
+  employeeId        String?
+  employee          Employee? @relation("TaskAssignee", fields: [employeeId], references: [id])
+  demandId          String?   @unique
+  demand            Demand?   @relation(fields: [demandId], references: [id])
+
+  status            String    @default("a_traiter")
+  priority          String    @default("normale")
+  dateReception     DateTime?
+  plannedStartDate  DateTime?
+  plannedEndDate    DateTime?
+  actualStartDate   DateTime?
+  actualEndDate     DateTime?
+  dateLastStatus    DateTime?
+  estimatedHours    Decimal?  @db.Decimal(6, 2)
+  budgetHours       Decimal?  @db.Decimal(6, 2)
+  facturable        Boolean   @default(true)
+  deliverableLinks  String[]
+  customFieldsData  Json?     @db.JsonB
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  timeEntries   TimeEntry[]
+  comments      TaskComment[]
+  statusHistory StatusHistory[]
+  deliverables  TaskDeliverable[]
+  tags          EntityTag[]       @relation("TaskTags")
+
+  @@map("tasks")
+}
+
+model TaskComment {
+  id          String   @id @default(uuid())
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  content     String
+  attachments String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("task_comments")
+}
+
+model StatusHistory {
+  id             String   @id @default(uuid())
+  taskId         String
+  task           Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  previousStatus String
+  newStatus      String
+  changedAt      DateTime @default(now())
+  comment        String?
+
+  @@map("status_history")
+}
+
+model TaskDeliverable {
+  id        String   @id @default(uuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  url       String
+  type      String?  // sharepoint, onedrive, dropbox, gdrive, url
+  label     String?
+  createdAt DateTime @default(now())
+
+  @@map("task_deliverables")
+}
+
+model TimeEntry {
+  id         String   @id @default(uuid())
+  taskId     String
+  task       Task     @relation(fields: [taskId], references: [id])
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  date       DateTime @db.Date
+  hours      Decimal  @db.Decimal(4, 2)
+  comment    String?
+  isValidated Boolean @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("time_entries")
+}
+
+// ============================================================
+// CODES PRODUITS
+// ============================================================
+
+model CodeProduit {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  designation   String
+  productType   String?  // etude, plan, note_calcul, releve, doe, apd, pdb, maj, autre
+  unitType      String?  // piece, heure, forfait, ml, m2
+  unitPrice     Decimal  @db.Decimal(10, 2)
+  timeGamme     Decimal? @db.Decimal(6, 2) // hours per unit
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
+  currencyId    String?
+  currency      Currency? @relation(fields: [currencyId], references: [id])
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tasks         Task[]
+  invoiceLines  InvoiceLine[]
+  quotelines    QuoteLine[]
+  demands       Demand[]
+  attachmentLines AttachmentLine[]
+
+  @@map("codes_produits")
+}
+
+// ============================================================
+// DEMANDS
+// ============================================================
+
+model Demand {
+  id              String    @id @default(uuid())
+  reference       String    @unique
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id])
+  clientId        String
+  client          Client    @relation(fields: [clientId], references: [id])
+  codeProduitId   String?
+  codeProduit     CodeProduit? @relation(fields: [codeProduitId], references: [id])
+  siteId          String?
+  site            Site?     @relation(fields: [siteId], references: [id])
+  demandeurId     String?
+  demandeur       Interlocuteur? @relation(fields: [demandeurId], references: [id])
+  createdById     String
+  createdBy       User      @relation("DemandCreatedBy", fields: [createdById], references: [id])
+  employeeId      String?
+  employee        Employee? @relation(fields: [employeeId], references: [id])
+
+  title           String
+  description     String?
+  dataLink        String?
+  status          String    @default("nouvelle")
+  priority        String    @default("normale")
+  requestedAt     DateTime  @default(now())
+  desiredDelivery DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  task Task?
+
+  @@map("demands")
+}
+
+// ============================================================
+// COMMERCIAL
+// ============================================================
+
+model Attachment {
+  id          String   @id @default(uuid())
+  reference   String   @unique
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id])
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id])
+  period      String   // "2024-01"
+  status      String   @default("genere")
+  totalHt     Decimal  @db.Decimal(10, 2)
+  currencyId  String?
+  currency    Currency? @relation(fields: [currencyId], references: [id])
+  pdfUrl      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lines    AttachmentLine[]
+  invoices Invoice[]
+
+  @@map("attachments")
+}
+
+model AttachmentLine {
+  id             String      @id @default(uuid())
+  attachmentId   String
+  attachment     Attachment  @relation(fields: [attachmentId], references: [id])
+  codeProduitId  String
+  codeProduit    CodeProduit @relation(fields: [codeProduitId], references: [id])
+  siteId         String?
+  quantity       Decimal     @db.Decimal(8, 2)
+  unitPrice      Decimal     @db.Decimal(10, 2)
+  totalHt        Decimal     @db.Decimal(10, 2)
+
+  @@map("attachment_lines")
+}
+
+model Quote {
+  id            String   @id @default(uuid())
+  reference     String   @unique
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
+  projectId     String?
+  project       Project? @relation(fields: [projectId], references: [id])
+  quoteDate     DateTime @default(now())
+  validUntil    DateTime?
+  status        String   @default("brouillon")
+  totalHt       Decimal  @db.Decimal(10, 2)
+  vatRate       Decimal  @db.Decimal(5, 2) @default(20)
+  vatAmount     Decimal  @db.Decimal(10, 2)
+  totalTtc      Decimal  @db.Decimal(10, 2)
+  discount      Decimal? @db.Decimal(5, 2)
+  currencyId    String?
+  currency      Currency? @relation(fields: [currencyId], references: [id])
+  conditions    String?
+  pdfUrl        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  lines  QuoteLine[]
+  orders Order[]
+
+  @@map("quotes")
+}
+
+model QuoteLine {
+  id            String      @id @default(uuid())
+  quoteId       String
+  quote         Quote       @relation(fields: [quoteId], references: [id])
+  codeProduitId String?
+  codeProduit   CodeProduit? @relation(fields: [codeProduitId], references: [id])
+  designation   String
+  quantity      Decimal     @db.Decimal(8, 2)
+  unitPrice     Decimal     @db.Decimal(10, 2)
+  totalHt       Decimal     @db.Decimal(10, 2)
+  order         Int         @default(0)
+
+  @@map("quote_lines")
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  reference   String   @unique
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id])
+  quoteId     String?
+  quote       Quote?   @relation(fields: [quoteId], references: [id])
+  orderDate   DateTime
+  amount      Decimal  @db.Decimal(10, 2)
+  status      String   @default("en_attente")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  invoices Invoice[]
+
+  @@map("orders")
+}
+
+model Invoice {
+  id             String      @id @default(uuid())
+  reference      String      @unique
+  clientId       String
+  client         Client      @relation(fields: [clientId], references: [id])
+  orderId        String?
+  order          Order?      @relation(fields: [orderId], references: [id])
+  attachmentId   String?
+  attachment     Attachment? @relation(fields: [attachmentId], references: [id])
+  invoiceDate    DateTime    @default(now())
+  dueDate        DateTime?
+  status         String      @default("brouillon")
+  totalHt        Decimal     @db.Decimal(10, 2)
+  vatRate        Decimal     @db.Decimal(5, 2) @default(20)
+  vatAmount      Decimal     @db.Decimal(10, 2)
+  totalTtc       Decimal     @db.Decimal(10, 2)
+  amountPaid     Decimal     @db.Decimal(10, 2) @default(0)
+  currencyId     String?
+  currency       Currency?   @relation(fields: [currencyId], references: [id])
+  pdfUrl         String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  lines InvoiceLine[]
+
+  @@map("invoices")
+}
+
+model InvoiceLine {
+  id            String      @id @default(uuid())
+  invoiceId     String
+  invoice       Invoice     @relation(fields: [invoiceId], references: [id])
+  codeProduitId String?
+  codeProduit   CodeProduit? @relation(fields: [codeProduitId], references: [id])
+  designation   String
+  quantity      Decimal     @db.Decimal(8, 2)
+  unitPrice     Decimal     @db.Decimal(10, 2)
+  totalHt       Decimal     @db.Decimal(10, 2)
+  order         Int         @default(0)
+
+  @@map("invoice_lines")
+}
+
+// ============================================================
+// ACCOUNTING
+// ============================================================
+
+model Supplier {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  vatNumber String?
+  siret     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchaseInvoices PurchaseInvoice[]
+
+  @@map("suppliers")
+}
+
+model PurchaseInvoice {
+  id          String    @id @default(uuid())
+  reference   String    @unique
+  supplierId  String
+  supplier    Supplier  @relation(fields: [supplierId], references: [id])
+  invoiceDate DateTime
+  dueDate     DateTime?
+  status      String    @default("en_attente")
+  totalHt     Decimal   @db.Decimal(10, 2)
+  vatAmount   Decimal   @db.Decimal(10, 2)
+  totalTtc    Decimal   @db.Decimal(10, 2)
+  amountPaid  Decimal   @db.Decimal(10, 2) @default(0)
+  fileUrl     String?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("purchase_invoices")
+}
+
+model ExpenseReport {
+  id          String    @id @default(uuid())
+  employeeId  String
+  employee    Employee  @relation(fields: [employeeId], references: [id])
+  approverId  String?
+  approver    Employee? @relation("ExpenseApprover", fields: [approverId], references: [id])
+  title       String
+  description String?
+  amount      Decimal   @db.Decimal(8, 2)
+  vatAmount   Decimal?  @db.Decimal(8, 2)
+  status      String    @default("en_attente")
+  expenseDate DateTime
+  receiptUrl  String?
+  currencyId  String?
+  currency    Currency? @relation(fields: [currencyId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("expense_reports")
+}
+
+// ============================================================
+// TAGS
+// ============================================================
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  color     String   @default("#FF6600")
+  createdAt DateTime @default(now())
+
+  entities EntityTag[]
+
+  @@map("tags")
+}
+
+model EntityTag {
+  tagId      String
+  tag        Tag    @relation(fields: [tagId], references: [id])
+  entityType String // client, project, task
+  entityId   String
+
+  client  Client?  @relation("ClientTags", fields: [entityId], references: [id], map: "entity_tag_client")
+  project Project? @relation("ProjectTags", fields: [entityId], references: [id], map: "entity_tag_project")
+  taskRel Task?    @relation("TaskTags", fields: [entityId], references: [id], map: "entity_tag_task")
+
+  @@id([tagId, entityType, entityId])
+  @@map("entity_tags")
+}
+
+// ============================================================
+// MESSAGING
+// ============================================================
+
+model Conversation {
+  id        String   @id @default(uuid())
+  name      String?
+  isGroup   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members  ConversationMember[]
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model ConversationMember {
+  conversationId String
+  employeeId     String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  employee       Employee     @relation(fields: [employeeId], references: [id])
+  joinedAt       DateTime     @default(now())
+
+  @@id([conversationId, employeeId])
+  @@map("conversation_members")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  content        String
+  fileUrl        String?
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("messages")
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  title     String
+  body      String?
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+// ============================================================
+// IMPORT
+// ============================================================
+
+model ImportTemplate {
+  id        String   @id @default(uuid())
+  name      String
+  clientId  String?
+  mapping   Json     @db.JsonB
+  dedupeRules Json?  @db.JsonB
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  importLogs ImportLog[]
+
+  @@map("import_templates")
+}
+
+model ImportLog {
+  id         String          @id @default(uuid())
+  templateId String?
+  template   ImportTemplate? @relation(fields: [templateId], references: [id])
+  userId     String
+  user       User            @relation(fields: [userId], references: [id])
+  fileName   String
+  status     String          @default("pending")
+  created    Int             @default(0)
+  updated    Int             @default(0)
+  errors     Int             @default(0)
+  ignored    Int             @default(0)
+  errorDetails Json?         @db.JsonB
+  createdAt  DateTime        @default(now())
+  completedAt DateTime?
+
+  @@map("import_logs")
+}
+
+// ============================================================
+// SETTINGS & ADMINISTRATION
+// ============================================================
+
+model CompanySettings {
+  id              String   @id @default("singleton")
+  legalName       String?
+  tradeName       String?
+  addressLine1    String?
+  postalCode      String?
+  city            String?
+  country         String   @default("FR")
+  siret           String?
+  siren           String?
+  vatNumber       String?
+  rcs             String?
+  capital         String?
+  iban            String?  // encrypted
+  bic             String?
+  email           String?
+  phone           String?
+  logoUrl         String?
+  legalMentions   String?
+  defaultCurrencyId String?
+  currency        Currency? @relation(fields: [defaultCurrencyId], references: [id])
+  quotePrefix     String   @default("DEV")
+  invoicePrefix   String   @default("FAC")
+  projectPrefix   String   @default("PRJ")
+  taskPrefix      String   @default("TSK")
+  updatedAt       DateTime @updatedAt
+
+  @@map("company_settings")
+}
+
+model Currency {
+  id        String   @id @default(uuid())
+  code      String   @unique // ISO 4217: EUR, USD, MAD, etc.
+  symbol    String
+  name      String
+  isDefault Boolean  @default(false)
+  isActive  Boolean  @default(true)
+
+  employees        Employee[]
+  codesProduits    CodeProduit[]
+  attachments      Attachment[]
+  quotes           Quote[]
+  invoices         Invoice[]
+  expenseReports   ExpenseReport[]
+  companySettings  CompanySettings[]
+
+  @@map("currencies")
+}
+
+// ============================================================
+// AUDIT
+// ============================================================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  changes    Json?    @db.JsonB
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
