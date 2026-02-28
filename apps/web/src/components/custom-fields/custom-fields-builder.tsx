@@ -15,7 +15,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
 import { Plus, Trash2, GripVertical, Loader2 } from 'lucide-react';
-import type { CustomFieldType, CustomFieldsData } from '@exeteam/shared';
+type CustomFieldType = 'text' | 'number' | 'date' | 'boolean' | 'select' | 'multiselect';
+type CustomFieldsData = Record<string, string | number | boolean | string[] | null>;
 
 type CustomFieldConfig = {
   key: string;
@@ -251,7 +252,7 @@ export function CustomFieldsBuilder({ clientId }: Props) {
                 <Switch
                   id="required"
                   checked={formValues.required}
-                  onCheckedChange={(v) => setFormValues((f) => ({ ...f, required: v }))}
+                  onCheckedChange={(v: boolean | 'indeterminate') => setFormValues((f) => ({ ...f, required: !!v }))}
                 />
                 <Label htmlFor="required">Requis</Label>
               </div>
@@ -259,7 +260,7 @@ export function CustomFieldsBuilder({ clientId }: Props) {
                 <Switch
                   id="showInList"
                   checked={formValues.showInList}
-                  onCheckedChange={(v) => setFormValues((f) => ({ ...f, showInList: v }))}
+                  onCheckedChange={(v: boolean | 'indeterminate') => setFormValues((f) => ({ ...f, showInList: !!v }))}
                 />
                 <Label htmlFor="showInList">Afficher dans tableau</Label>
               </div>

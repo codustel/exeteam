@@ -21,6 +21,7 @@ const schema = z.object({
   email: z.string().email('Email invalide').optional().or(z.literal('')),
   phone: z.string().optional(),
   addressLine1: z.string().optional(),
+  addressLine2: z.string().optional(),
   postalCode: z.string().optional(),
   city: z.string().optional(),
   country: z.string().optional(),

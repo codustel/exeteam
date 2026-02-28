@@ -45,7 +45,7 @@ export function ColumnSelector({ columns, visibleColumns, onChange }: Props) {
               <Checkbox
                 id={`col-${col.key}`}
                 checked={visibleColumns.includes(col.key)}
-                onCheckedChange={(checked) => {
+                onCheckedChange={(checked: boolean | 'indeterminate') => {
                   if (!col.required) toggle(col.key, !!checked);
                 }}
                 disabled={col.required}

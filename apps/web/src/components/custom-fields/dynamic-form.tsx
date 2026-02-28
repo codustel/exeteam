@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2 } from 'lucide-react';
-import type { CustomFieldType, CustomFieldsData } from '@exeteam/shared';
+type CustomFieldType = 'text' | 'number' | 'date' | 'boolean' | 'select' | 'multiselect';
+type CustomFieldsData = Record<string, string | number | boolean | string[] | null>;
 
 interface CustomFieldConfig {
   key: string;
@@ -99,7 +100,7 @@ export function DynamicForm({ config, defaultValues, onSubmit, isLoading, readOn
                 <Switch
                   id={fieldKey}
                   checked={!!currentValue}
-                  onCheckedChange={(checked) => setValue(fieldKey, checked)}
+                  onCheckedChange={(checked: boolean | 'indeterminate') => setValue(fieldKey, !!checked)}
                   disabled={readOnly}
                 />
                 <Label htmlFor={fieldKey} className="text-sm font-normal">
@@ -151,7 +152,7 @@ export function DynamicForm({ config, defaultValues, onSubmit, isLoading, readOn
                           <Checkbox
                             id={`${fieldKey}-${opt}`}
                             checked={selected}
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={(checked: boolean | 'indeterminate') => {
                               const current = (currentValue as string[]) ?? [];
                               setValue(
                                 fieldKey,

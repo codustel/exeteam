@@ -5,8 +5,15 @@ export interface ClientListItem {
   name: string;
   legalName: string | null;
   logoUrl: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  postalCode: string | null;
   city: string | null;
   country: string | null;
+  siret: string | null;
+  vatNumber: string | null;
+  email: string | null;
+  phone: string | null;
   isActive: boolean;
   operators: Array<{ operator: { id: string; name: string; logoUrl: string | null } }>;
   tags: Array<{ tag: { id: string; name: string; color: string } }>;

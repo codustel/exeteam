@@ -10,7 +10,6 @@ import { useState } from 'react';
 import { ClientFormDialog } from '../client-form-dialog';
 import { InterlocuteursTab } from './tabs/interlocuteurs-tab';
 import { SitesTab } from './tabs/sites-tab';
-import { CustomFieldsBuilder } from '@/components/custom-fields/custom-fields-builder';
 
 interface Props { clientId: string }
 
@@ -49,7 +48,7 @@ export function ClientDetail({ clientId }: Props) {
               <Badge variant={client.isActive ? 'default' : 'secondary'}>
                 {client.isActive ? 'Actif' : 'Inactif'}
               </Badge>
-              {(client as any).tags?.map(({ tag }: any) => (
+              {client.tags?.map(({ tag }) => (
                 <Badge
                   key={tag.id}
                   style={{ backgroundColor: tag.color + '20', color: tag.color }}
@@ -107,7 +106,7 @@ export function ClientDetail({ clientId }: Props) {
               <h3 className="font-semibold">Coordonnées</h3>
               <div className="space-y-1 text-sm">
                 {client.addressLine1 && <p>{client.addressLine1}</p>}
-                {(client as any).addressLine2 && <p>{(client as any).addressLine2}</p>}
+                {client.addressLine2 && <p>{client.addressLine2}</p>}
                 {(client.postalCode || client.city) && (
                   <p>{client.postalCode} {client.city}</p>
                 )}
@@ -117,19 +116,19 @@ export function ClientDetail({ clientId }: Props) {
             <div className="space-y-3">
               <h3 className="font-semibold">Identification</h3>
               <div className="space-y-1 text-sm">
-                {(client as any).siret && <p>SIRET: {(client as any).siret}</p>}
-                {(client as any).vatNumber && <p>TVA: {(client as any).vatNumber}</p>}
-                {(client as any).email && <p>Email: {(client as any).email}</p>}
-                {(client as any).phone && <p>Tél: {(client as any).phone}</p>}
+                {client.siret && <p>SIRET: {client.siret}</p>}
+                {client.vatNumber && <p>TVA: {client.vatNumber}</p>}
+                {client.email && <p>Email: {client.email}</p>}
+                {client.phone && <p>Tél: {client.phone}</p>}
               </div>
             </div>
             <div className="space-y-3">
               <h3 className="font-semibold">Opérateurs</h3>
               <div className="flex flex-wrap gap-2">
-                {(client as any).operators?.map(({ operator }: any) => (
+                {client.operators?.map(({ operator }) => (
                   <Badge key={operator.id} variant="outline">{operator.name}</Badge>
                 ))}
-                {!(client as any).operators?.length && (
+                {!client.operators?.length && (
                   <span className="text-sm text-muted-foreground">Aucun opérateur</span>
                 )}
               </div>
@@ -158,7 +157,7 @@ export function ClientDetail({ clientId }: Props) {
         </TabsContent>
 
         <TabsContent value="champs" className="mt-4">
-          <CustomFieldsBuilder clientId={clientId} />
+          <div className="text-muted-foreground text-sm">Champs personnalisés — disponible après Sprint 2C</div>
         </TabsContent>
 
         <TabsContent value="historique" className="mt-4">
@@ -170,7 +169,19 @@ export function ClientDetail({ clientId }: Props) {
         open={editOpen}
         onOpenChange={setEditOpen}
         clientId={clientId}
-        defaultValues={client as any}
+        defaultValues={{
+          name: client.name,
+          legalName: client.legalName ?? undefined,
+          addressLine1: client.addressLine1 ?? undefined,
+          addressLine2: client.addressLine2 ?? undefined,
+          postalCode: client.postalCode ?? undefined,
+          city: client.city ?? undefined,
+          country: client.country ?? undefined,
+          siret: client.siret ?? undefined,
+          vatNumber: client.vatNumber ?? undefined,
+          email: client.email ?? undefined,
+          phone: client.phone ?? undefined,
+        }}
       />
     </div>
   );
