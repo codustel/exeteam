@@ -45,7 +45,7 @@ export class ClientsController {
   @Post(':id/logo')
   @RequirePermissions('clients.update')
   @UseInterceptors(FileInterceptor('file'))
-  uploadLogo(@Param('id') id: string, @UploadedFile() file: Express.Multer.File): Promise<unknown> {
+  uploadLogo(@Param('id') id: string, @UploadedFile() file: { originalname: string; buffer: Buffer; mimetype: string }): Promise<unknown> {
     // Logo upload is handled client-side via Supabase Storage signed URL
     // This endpoint receives the public URL after upload and stores it
     return this.clientsService.updateLogo(id, file.originalname);
