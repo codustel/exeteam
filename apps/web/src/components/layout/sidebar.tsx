@@ -7,6 +7,7 @@ import {
   LayoutDashboard, FolderKanban, CheckSquare, MapPin, Users, Building2,
   Package, FileText, Receipt, Euro, MessageSquare,
   Upload, Settings, BarChart3, CalendarDays, ChevronLeft, ChevronRight,
+  FileCheck,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../ui/button';
@@ -18,7 +19,9 @@ const navItems = [
   { label: 'Sites', href: '/sites', icon: MapPin },
   { label: 'Clients', href: '/clients', icon: Building2 },
   { label: 'Codes produits', href: '/products', icon: Package },
-  { label: 'Commercial', href: '/commercial', icon: FileText },
+  { label: 'Bordereaux', href: '/commercial/attachments', icon: FileText },
+  { label: 'Devis', href: '/commercial/quotes', icon: FileCheck },
+  { label: 'Factures', href: '/commercial/invoices', icon: Euro },
   { label: 'Comptabilité', href: '/accounting', icon: Euro },
   { label: 'Employés', href: '/employees', icon: Users },
   { label: 'Congés', href: '/leaves', icon: CalendarDays },
