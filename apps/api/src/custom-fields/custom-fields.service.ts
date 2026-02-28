@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
-interface CustomFieldConfig {
+export interface CustomFieldConfig {
   key: string;
   label: string;
   type: 'text' | 'number' | 'date' | 'boolean' | 'select' | 'multiselect';
@@ -45,7 +45,7 @@ export class CustomFieldsService {
     return Array.from(merged.values()).sort((a, b) => a.order - b.order);
   }
 
-  async updateClientConfig(clientId: string, config: CustomFieldConfig[]) {
+  async updateClientConfig(clientId: string, config: CustomFieldConfig[]): Promise<{ id: string; customFieldsConfig: unknown }> {
     this.validateConfig(config);
     const client = await this.prisma.client.findUnique({ where: { id: clientId, deletedAt: null } });
     if (!client) throw new NotFoundException('Client not found');
@@ -53,10 +53,10 @@ export class CustomFieldsService {
       where: { id: clientId },
       data: { customFieldsConfig: config as any },
       select: { id: true, customFieldsConfig: true },
-    });
+    }) as Promise<{ id: string; customFieldsConfig: unknown }>;
   }
 
-  async updateProjectConfig(projectId: string, config: CustomFieldConfig[]) {
+  async updateProjectConfig(projectId: string, config: CustomFieldConfig[]): Promise<{ id: string; customFieldsConfig: unknown }> {
     this.validateConfig(config);
     const project = await this.prisma.project.findUnique({ where: { id: projectId, deletedAt: null } });
     if (!project) throw new NotFoundException('Project not found');
@@ -64,30 +64,30 @@ export class CustomFieldsService {
       where: { id: projectId },
       data: { customFieldsConfig: config as any },
       select: { id: true, customFieldsConfig: true },
-    });
+    }) as Promise<{ id: string; customFieldsConfig: unknown }>;
   }
 
-  async updateSiteData(siteId: string, data: Record<string, unknown>) {
+  async updateSiteData(siteId: string, data: Record<string, unknown>): Promise<{ id: string; customFieldsData: unknown }> {
     const site = await this.prisma.site.findUnique({ where: { id: siteId, deletedAt: null } });
     if (!site) throw new NotFoundException('Site not found');
     return this.prisma.site.update({
       where: { id: siteId },
       data: { customFieldsData: data as any },
       select: { id: true, customFieldsData: true },
-    });
+    }) as Promise<{ id: string; customFieldsData: unknown }>;
   }
 
-  async updateTaskData(taskId: string, data: Record<string, unknown>) {
+  async updateTaskData(taskId: string, data: Record<string, unknown>): Promise<{ id: string; customFieldsData: unknown }> {
     const task = await this.prisma.task.findUnique({ where: { id: taskId, deletedAt: null } });
     if (!task) throw new NotFoundException('Task not found');
     return this.prisma.task.update({
       where: { id: taskId },
       data: { customFieldsData: data as any },
       select: { id: true, customFieldsData: true },
-    });
+    }) as Promise<{ id: string; customFieldsData: unknown }>;
   }
 
-  private validateConfig(config: CustomFieldConfig[]) {
+  private validateConfig(config: CustomFieldConfig[]): void {
     const keys = config.map((f) => f.key);
     const uniqueKeys = new Set(keys);
     if (keys.length !== uniqueKeys.size) {

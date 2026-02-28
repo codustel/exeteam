@@ -1,5 +1,5 @@
 import { Controller, Get, Put, Patch, Param, Body, Query, UseGuards } from '@nestjs/common';
-import { CustomFieldsService } from './custom-fields.service';
+import { CustomFieldsService, CustomFieldConfig } from './custom-fields.service';
 import { JwtAuthGuard } from '../auth/auth.guard';
 import { RequirePermissions } from '../auth/permissions.decorator';
 import { PermissionsGuard } from '../auth/permissions.guard';
@@ -15,7 +15,7 @@ export class CustomFieldsController {
   getConfig(
     @Query('clientId') clientId: string,
     @Query('projectId') projectId?: string,
-  ) {
+  ): Promise<CustomFieldConfig[]> {
     return this.customFieldsService.getConfig(clientId, projectId);
   }
 
@@ -25,7 +25,7 @@ export class CustomFieldsController {
   updateClientConfig(
     @Param('id') id: string,
     @Body() config: Record<string, unknown>[],
-  ) {
+  ): Promise<{ id: string; customFieldsConfig: unknown }> {
     return this.customFieldsService.updateClientConfig(id, config as any);
   }
 
@@ -35,7 +35,7 @@ export class CustomFieldsController {
   updateProjectConfig(
     @Param('id') id: string,
     @Body() config: Record<string, unknown>[],
-  ) {
+  ): Promise<{ id: string; customFieldsConfig: unknown }> {
     return this.customFieldsService.updateProjectConfig(id, config as any);
   }
 
@@ -45,7 +45,7 @@ export class CustomFieldsController {
   updateSiteData(
     @Param('id') id: string,
     @Body() data: Record<string, unknown>,
-  ) {
+  ): Promise<{ id: string; customFieldsData: unknown }> {
     return this.customFieldsService.updateSiteData(id, data);
   }
 
@@ -55,7 +55,7 @@ export class CustomFieldsController {
   updateTaskData(
     @Param('id') id: string,
     @Body() data: Record<string, unknown>,
-  ) {
+  ): Promise<{ id: string; customFieldsData: unknown }> {
     return this.customFieldsService.updateTaskData(id, data);
   }
 }
