@@ -24,7 +24,7 @@ export class UsersService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<unknown> {
     const user = await this.prisma.user.findUnique({
       where: { id, deletedAt: null },
       include: { role: true, employee: true, interlocuteur: true },
@@ -33,7 +33,7 @@ export class UsersService {
     return user;
   }
 
-  async create(dto: CreateUserDto) {
+  async create(dto: CreateUserDto): Promise<unknown> {
     return this.authService.inviteUser(
       dto.email,
       dto.roleId,

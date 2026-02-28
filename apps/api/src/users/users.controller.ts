@@ -17,10 +17,10 @@ export class UsersController {
   findAll() { return this.usersService.findAll(); }
 
   @Get(':id')
-  findOne(@Param('id') id: string) { return this.usersService.findOne(id); }
+  findOne(@Param('id') id: string): Promise<unknown> { return this.usersService.findOne(id); }
 
   @Post()
-  create(@Body() dto: CreateUserDto) { return this.usersService.create(dto); }
+  create(@Body() dto: CreateUserDto): Promise<unknown> { return this.usersService.create(dto); }
 
   @Patch(':id/role')
   updateRole(@Param('id') id: string, @Body('roleId') roleId: string) {

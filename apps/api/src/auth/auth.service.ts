@@ -17,7 +17,7 @@ export class AuthService {
     );
   }
 
-  async inviteUser(email: string, roleId: string, associateEmployeeId?: string, associateInterlocuteurId?: string) {
+  async inviteUser(email: string, roleId: string, associateEmployeeId?: string, associateInterlocuteurId?: string): Promise<unknown> {
     // Create Supabase Auth user via admin invite
     const { data, error } = await this.supabase.auth.admin.inviteUserByEmail(email);
     if (error) throw new Error(error.message);
