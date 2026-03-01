@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { getRowSchema, EntityType } from './helpers/row-validators';
 import { isFuzzyMatch } from './helpers/levenshtein';
 import type { ImportError } from '@exeteam/shared';
+import type { Prisma } from '@prisma/client';
 
 interface ImportJobData {
   jobId: string;
@@ -38,7 +39,8 @@ export class ImportProcessor {
       // Download file
       const response = await fetch(job.fileUrl);
       if (!response.ok) throw new Error(`Cannot download file: ${response.statusText}`);
-      const buffer = Buffer.from(await response.arrayBuffer());
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const buffer: any = Buffer.from(await response.arrayBuffer());
 
       // Parse workbook
       const workbook = new ExcelJS.Workbook();
@@ -127,7 +129,7 @@ export class ImportProcessor {
         if (processedRows % 50 === 0) {
           await this.prisma.importJob.update({
             where: { id: jobId },
-            data: { processedRows, errorRows, errors },
+            data: { processedRows, errorRows, errors: errors as unknown as Prisma.InputJsonValue },
           });
         }
       }
@@ -140,7 +142,7 @@ export class ImportProcessor {
           processedRows,
           errorRows,
           totalRows,
-          errors,
+          errors: errors as unknown as Prisma.InputJsonValue,
           completedAt: new Date(),
         },
       });

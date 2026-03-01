@@ -61,7 +61,8 @@ export class ImportService {
   async parseHeaders(fileUrl: string): Promise<string[]> {
     const response = await fetch(fileUrl);
     if (!response.ok) throw new BadRequestException('Impossible de télécharger le fichier');
-    const buffer = Buffer.from(await response.arrayBuffer());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const buffer: any = Buffer.from(await response.arrayBuffer());
 
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(buffer);

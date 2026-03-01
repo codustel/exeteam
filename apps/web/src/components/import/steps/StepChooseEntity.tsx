@@ -38,7 +38,7 @@ export function StepChooseEntity({ value, onChange, onNext }: Props) {
 
       <RadioGroup
         value={value ?? ''}
-        onValueChange={(v) => onChange(v as ImportEntityType)}
+        onValueChange={(v: string) => onChange(v as ImportEntityType)}
         className="grid grid-cols-1 gap-3 sm:grid-cols-2"
       >
         {ENTITY_OPTIONS.map((opt) => (
