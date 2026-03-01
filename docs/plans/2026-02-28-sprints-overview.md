@@ -36,7 +36,7 @@ Sprint 0 (Foundation)
 | Sprint 4A | `2026-02-28-sprint-4a-accounting.md` | Ready |
 | Sprint 4B | `2026-02-28-sprint-4b-import.md` | Ready |
 | Sprint 4C | `2026-02-28-sprint-4c-dashboards.md` | Ready |
-| Sprint 5 | `2026-02-28-sprint-5-polish-deploy.md` | To create |
+| Sprint 5 | `2026-02-28-sprint-5-polish-deploy.md` | Ready |
 
 ## How to Execute Sprints
 
