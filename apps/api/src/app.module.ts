@@ -26,6 +26,7 @@ import { CommercialModule } from './commercial/commercial.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { ImportModule } from './import/import.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { ImportModule } from './import/import.module';
     MessagingModule,
     AccountingModule,
     ImportModule,
+    DashboardModule,
   ],
   controllers: [AppController],
 })
