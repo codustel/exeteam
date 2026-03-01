@@ -129,7 +129,7 @@ export function FinancierClient() {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
               <XAxis dataKey="month" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-              <Tooltip formatter={(value: number) => formatEUR(value)} />
+              <Tooltip formatter={(value: any) => formatEUR(Number(value))} />
               <Legend />
               <Bar dataKey="CA" name="CA HT" fill="#FF6600" radius={[4, 4, 0, 0]} />
               <Bar dataKey="achats" name="Achats HT" fill="#94a3b8" radius={[4, 4, 0, 0]} />
@@ -184,7 +184,7 @@ export function FinancierClient() {
                 tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
               />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={110} />
-              <Tooltip formatter={(value: number) => formatEUR(value)} />
+              <Tooltip formatter={(value: any) => formatEUR(Number(value))} />
               <Bar dataKey="CA HT" fill="#FF6600" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>

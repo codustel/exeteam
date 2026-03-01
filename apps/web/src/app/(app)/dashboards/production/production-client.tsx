@@ -127,7 +127,7 @@ export function ProductionClient() {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
               <XAxis dataKey="name" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 11 }} unit="%" />
-              <Tooltip formatter={(v: number) => [`${v.toFixed(1)}%`, 'Rendement']} />
+              <Tooltip formatter={(v: any) => [`${Number(v).toFixed(1)}%`, 'Rendement']} />
               <Bar dataKey="Rendement" fill="#FF6600" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

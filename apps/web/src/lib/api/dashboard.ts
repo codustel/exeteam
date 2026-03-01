@@ -6,10 +6,11 @@ import type {
   ClientDashboard,
   EmployeeDashboard,
   RentabiliteDashboard,
+  RentabiliteEmployee,
   DashboardExportType,
 } from '@exeteam/shared';
 
-export type { GeneralDashboard, ProductionDashboard, FinancierDashboard, ClientDashboard, EmployeeDashboard, RentabiliteDashboard };
+export type { GeneralDashboard, ProductionDashboard, FinancierDashboard, ClientDashboard, EmployeeDashboard, RentabiliteDashboard, RentabiliteEmployee };
 
 function toQuery(params: Record<string, unknown>): string {
   const q = new URLSearchParams();

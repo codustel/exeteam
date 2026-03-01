@@ -131,7 +131,8 @@ export function GeneralClient() {
                   />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => [value, 'Tâches']} />
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <Tooltip formatter={(value: any) => [value, 'Tâches']} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>

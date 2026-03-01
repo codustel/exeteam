@@ -103,7 +103,7 @@ export function EmployeDashboardClient({ employeeId }: Props) {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
               <XAxis dataKey="week" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 11 }} unit="%" />
-              <Tooltip formatter={(v: number) => [`${v.toFixed(1)}%`, 'Rendement']} />
+              <Tooltip formatter={(v: any) => [`${Number(v).toFixed(1)}%`, 'Rendement']} />
               <Line
                 type="monotone"
                 dataKey="rendement"
