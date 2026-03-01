@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { TagsService } from './tags.service';
+import { CreateTagDto, UpdateTagDto } from './dto/create-tag.dto';
 import { JwtAuthGuard } from '../auth/auth.guard';
 import { RequirePermissions } from '../auth/permissions.decorator';
 import { PermissionsGuard } from '../auth/permissions.guard';
@@ -15,14 +16,14 @@ export class TagsController {
 
   @Post()
   @RequirePermissions('tags.create')
-  create(@Body('name') name: string, @Body('color') color?: string) {
-    return this.tagsService.create(name, color);
+  create(@Body() dto: CreateTagDto) {
+    return this.tagsService.create(dto.name, dto.color);
   }
 
   @Patch(':id')
   @RequirePermissions('tags.update')
-  update(@Param('id') id: string, @Body('name') name?: string, @Body('color') color?: string) {
-    return this.tagsService.update(id, name, color);
+  update(@Param('id') id: string, @Body() dto: UpdateTagDto) {
+    return this.tagsService.update(id, dto.name, dto.color);
   }
 
   @Delete(':id')

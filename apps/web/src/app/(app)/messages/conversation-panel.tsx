@@ -4,9 +4,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { messagingApi, type Message } from '@/lib/api/messaging';
 import { useRealtimeMessages, type RealtimeMessage } from '@/hooks/use-realtime-messages';
+import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Paperclip, Users } from 'lucide-react';
+import { Send, Paperclip, Users, X, FileIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -16,7 +17,10 @@ interface Props { conversationId: string }
 export function ConversationPanel({ conversationId }: Props) {
   const [text, setText] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [pendingFile, setPendingFile] = useState<{ name: string; url: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   const { data: conversation } = useQuery({
@@ -58,22 +62,46 @@ export function ConversationPanel({ conversationId }: Props) {
     messagingApi.markRead(conversationId).catch(() => {});
   }, [conversationId]);
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      const ext = file.name.split('.').pop();
+      const path = `messages/${conversationId}/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('attachments').upload(path, file);
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(path);
+      setPendingFile({ name: file.name, url: urlData.publicUrl });
+    } catch {
+      alert('Erreur lors de l\'upload du fichier');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const sendMutation = useMutation({
-    mutationFn: (content: string) => messagingApi.sendMessage(conversationId, { content }),
+    mutationFn: (payload: { content: string; fileUrl?: string }) =>
+      messagingApi.sendMessage(conversationId, payload),
     onSuccess: (newMsg) => {
-      // Optimistic: add to local state immediately (realtime will also fire)
       setMessages(prev => {
         if (prev.find(m => m.id === (newMsg as any).id)) return prev;
         return [...prev, newMsg as any];
       });
       setText('');
+      setPendingFile(null);
     },
   });
 
   const handleSend = () => {
     const trimmed = text.trim();
-    if (!trimmed || sendMutation.isPending) return;
-    sendMutation.mutate(trimmed);
+    if ((!trimmed && !pendingFile) || sendMutation.isPending) return;
+    sendMutation.mutate({
+      content: trimmed || (pendingFile ? `📎 ${pendingFile.name}` : ''),
+      fileUrl: pendingFile?.url,
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -141,9 +169,30 @@ export function ConversationPanel({ conversationId }: Props) {
       </div>
 
       {/* Input */}
-      <div className="px-6 py-4 border-t bg-background">
+      <div className="px-6 py-4 border-t bg-background space-y-2">
+        {pendingFile && (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-md text-sm">
+            <FileIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <span className="truncate flex-1">{pendingFile.name}</span>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPendingFile(null)}>
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="flex-shrink-0 text-muted-foreground">
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="flex-shrink-0 text-muted-foreground"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
             <Paperclip className="h-4 w-4" />
           </Button>
           <Input
@@ -156,7 +205,7 @@ export function ConversationPanel({ conversationId }: Props) {
           <Button
             size="icon"
             onClick={handleSend}
-            disabled={!text.trim() || sendMutation.isPending}
+            disabled={(!text.trim() && !pendingFile) || sendMutation.isPending}
             className="flex-shrink-0"
           >
             <Send className="h-4 w-4" />

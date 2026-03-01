@@ -34,6 +34,21 @@ export const quotesApi = {
   delete: (id: string) => apiRequest(`/commercial/quotes/${id}`, { method: 'DELETE' }),
 };
 
+export const ordersApi = {
+  list: (params: Record<string, string | undefined>) => {
+    const qs = new URLSearchParams(
+      Object.entries(params).filter(([, v]) => v !== undefined) as [string, string][],
+    ).toString();
+    return apiRequest<any>(`/commercial/orders?${qs}`);
+  },
+  getOne: (id: string) => apiRequest<any>(`/commercial/orders/${id}`),
+  create: (data: Record<string, unknown>) =>
+    apiRequest<any>('/commercial/orders', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: string, data: Record<string, unknown>) =>
+    apiRequest<any>(`/commercial/orders/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  delete: (id: string) => apiRequest(`/commercial/orders/${id}`, { method: 'DELETE' }),
+};
+
 export const invoicesApi = {
   list: (params: Record<string, string | undefined>) => {
     const qs = new URLSearchParams(
