@@ -105,7 +105,6 @@ export class ExpenseReportsService {
             id: true,
             firstName: true,
             lastName: true,
-            email: true,
             managerId: true,
           },
         },
