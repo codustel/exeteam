@@ -46,6 +46,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^15.0.0",
     "react-hook-form": "^7.71.2",
+    "recharts": "^3.7.0",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",
