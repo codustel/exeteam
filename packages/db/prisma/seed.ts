@@ -54,6 +54,9 @@ const DEFAULT_PERMISSIONS = [
   { module: 'reports', action: 'read_financial_dashboard', isMasked: true },
   // Accounting
   { module: 'accounting', action: 'full_access', isMasked: true },
+  { module: 'accounting', action: 'read', isMasked: true },
+  { module: 'accounting', action: 'write', isMasked: true },
+  { module: 'accounting', action: 'approve', isMasked: true },
   // Leaves
   { module: 'leaves', action: 'read' },
   { module: 'leaves', action: 'create' },
@@ -87,7 +90,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'projects.*', 'tasks.*', 'sites.*', 'clients.*', 'employees.create',
     'employees.read', 'employees.update', 'hr.read_salaries',
     'commercial.*', 'reports.*', 'leaves.*', 'messaging.access',
-    'tags.*', 'import.excel', 'custom_fields.*',
+    'tags.*', 'import.excel', 'custom_fields.*', 'accounting.*',
   ],
   responsable_production: [
     'projects.*', 'tasks.*', 'sites.*', 'clients.read', 'clients.create',
@@ -97,10 +100,10 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
   employe: [
     'tasks.read', 'tasks.update', 'tasks.timelog', 'sites.read',
     'projects.read', 'clients.read', 'leaves.create', 'leaves.read',
-    'messaging.access',
+    'messaging.access', 'accounting.read', 'accounting.write',
   ],
   comptable: [
-    'accounting.full_access', 'commercial.*', 'reports.read_financial_dashboard',
+    'accounting.*', 'commercial.*', 'reports.read_financial_dashboard',
     'clients.read', 'employees.read',
   ],
   rh: [
