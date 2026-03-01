@@ -12,6 +12,8 @@
     "db:migrate": "turbo db:migrate",
     "db:push": "turbo db:push",
     "db:studio": "pnpm --filter @exeteam/db studio",
+    "test:unit": "cd apps/api && pnpm vitest run",
+    "test:e2e": "cd apps/web && npx playwright test",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\" --ignore-path .gitignore"
   },
   "devDependencies": {

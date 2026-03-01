@@ -27,6 +27,9 @@ import { MessagingModule } from './messaging/messaging.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { ImportModule } from './import/import.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { SearchModule } from './modules/search/search.module';
+import { RgpdModule } from './modules/rgpd/rgpd.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -74,6 +77,9 @@ import { DashboardModule } from './dashboard/dashboard.module';
     AccountingModule,
     ImportModule,
     DashboardModule,
+    SearchModule,
+    RgpdModule,
+    HealthModule,
   ],
   controllers: [AppController],
 })

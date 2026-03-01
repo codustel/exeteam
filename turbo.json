@@ -31,6 +31,10 @@
     "db:push": {
       "cache": false
     },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
     "studio": {
       "cache": false,
       "persistent": true
