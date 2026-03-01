@@ -31,7 +31,8 @@ model User {
   statusChanges  StatusHistory[]
   notifications  Notification[]
   auditLogs      AuditLog[]
-  importLogs     ImportLog[]
+  importJobs      ImportJob[]      @relation("ImportJobCreator")
+  importTemplates ImportTemplate[]  @relation("ImportTemplateCreator")
   messages       Message[]
   createdDemands Demand[]       @relation("DemandCreatedBy")
   timeEntries    TimeEntry[]
@@ -891,37 +892,41 @@ model Notification {
 // ============================================================
 
 model ImportTemplate {
-  id        String   @id @default(uuid())
-  name      String
-  clientId  String?
-  mapping   Json     @db.JsonB
-  dedupeRules Json?  @db.JsonB
-  createdBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  entityType  String
+  mappings    Json     @db.JsonB
+  createdById String?
+  createdBy   User?    @relation("ImportTemplateCreator", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  importLogs ImportLog[]
+  importJobs ImportJob[]
 
   @@map("import_templates")
 }
 
-model ImportLog {
-  id         String          @id @default(uuid())
-  templateId String?
-  template   ImportTemplate? @relation(fields: [templateId], references: [id])
-  userId     String
-  user       User            @relation(fields: [userId], references: [id])
-  fileName   String
-  status     String          @default("pending")
-  created    Int             @default(0)
-  updated    Int             @default(0)
-  errors     Int             @default(0)
-  ignored    Int             @default(0)
-  errorDetails Json?         @db.JsonB
-  createdAt  DateTime        @default(now())
-  completedAt DateTime?
+model ImportJob {
+  id            String    @id @default(uuid())
+  entityType    String
+  status        String    @default("pending")
+  totalRows     Int       @default(0)
+  processedRows Int       @default(0)
+  errorRows     Int       @default(0)
+  errors        Json?     @db.JsonB
+  fileUrl       String
+  fileName      String
+  mappings      Json      @db.JsonB
+  onDuplicate   String    @default("skip")
+  templateId    String?
+  template      ImportTemplate? @relation(fields: [templateId], references: [id])
+  createdById   String
+  createdBy     User      @relation("ImportJobCreator", fields: [createdById], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  completedAt   DateTime?
 
-  @@map("import_logs")
+  @@map("import_jobs")
 }
 
 // ============================================================
