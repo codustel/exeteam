@@ -39,11 +39,12 @@ export class ImportProcessor {
       // Download file
       const response = await fetch(job.fileUrl);
       if (!response.ok) throw new Error(`Cannot download file: ${response.statusText}`);
-      const buffer = Buffer.from(await response.arrayBuffer()) as Buffer;
+      const arrayBuf = await response.arrayBuffer();
 
       // Parse workbook
       const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(buffer);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await workbook.xlsx.load(Buffer.from(new Uint8Array(arrayBuf)) as any);
       const sheet = workbook.worksheets[0];
       if (!sheet) throw new Error('Empty workbook');
 
@@ -128,7 +129,7 @@ export class ImportProcessor {
         if (processedRows % 50 === 0) {
           await this.prisma.importJob.update({
             where: { id: jobId },
-            data: { processedRows, errorRows, errors },
+            data: { processedRows, errorRows, errors: errors as unknown as Prisma.InputJsonValue },
           });
         }
       }
@@ -141,7 +142,7 @@ export class ImportProcessor {
           processedRows,
           errorRows,
           totalRows,
-          errors,
+          errors: errors as unknown as Prisma.InputJsonValue,
           completedAt: new Date(),
         },
       });
@@ -154,7 +155,7 @@ export class ImportProcessor {
         where: { id: jobId },
         data: {
           status: 'failed',
-          errors: [{ row: 0, field: '', message: msg }],
+          errors: [{ row: 0, field: '', message: msg }] as unknown as Prisma.InputJsonValue,
           completedAt: new Date(),
         },
       });
