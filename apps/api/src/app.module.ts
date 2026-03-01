@@ -23,6 +23,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { PushModule } from './push/push.module';
 import { CommercialModule } from './commercial/commercial.module';
 import { MessagingModule } from './messaging/messaging.module';
+import { AccountingModule } from './accounting/accounting.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { MessagingModule } from './messaging/messaging.module';
     PushModule,
     CommercialModule,
     MessagingModule,
+    AccountingModule,
   ],
   controllers: [AppController],
 })
