@@ -33,9 +33,9 @@ Sprint 0 (Foundation)
 | Sprint 3B | `2026-02-28-sprint-3b-demands.md` | Ready |
 | Sprint 3C | `2026-02-28-sprint-3c-commercial.md` | Ready |
 | Sprint 3D | `2026-02-28-sprint-3d-messaging.md` | Ready |
-| Sprint 4A | `2026-02-28-sprint-4a-accounting.md` | To create |
-| Sprint 4B | `2026-02-28-sprint-4b-import.md` | To create |
-| Sprint 4C | `2026-02-28-sprint-4c-dashboards.md` | To create |
+| Sprint 4A | `2026-02-28-sprint-4a-accounting.md` | Ready |
+| Sprint 4B | `2026-02-28-sprint-4b-import.md` | Ready |
+| Sprint 4C | `2026-02-28-sprint-4c-dashboards.md` | Ready |
 | Sprint 5 | `2026-02-28-sprint-5-polish-deploy.md` | To create |
 
 ## How to Execute Sprints
