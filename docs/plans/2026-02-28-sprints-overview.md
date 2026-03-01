@@ -93,6 +93,7 @@ Password for DATABASE_URL: Get from Supabase Dashboard → Settings → Database
 - `feat/accounting` — Sprint 4A
 - `feat/import` — Sprint 4B
 - `feat/dashboards` — Sprint 4C
+- `feat/polish` — Sprint 5
 
 ## Sprint 2 Subagent Briefs Summary
 
@@ -233,3 +234,33 @@ Password for DATABASE_URL: Get from Supabase Dashboard → Settings → Database
 - Rapport Rentabilité Salariale: salary cost vs revenue (permission-gated)
 - Recharts for all charts
 - Export Excel (ExcelJS) with custom fields
+
+
+### Sprint 5 — UX Polish + Tests + Deploy (`feat/polish`)
+Dépendance : Sprint 4 mergé.
+1. Merge toutes les branches feat/* sur main
+2. UX : sélecteur colonnes (ColumnSelector), infinite scroll mobile, filtres sur JSONB, recherche globale Ctrl+K (Command), animations Framer Motion
+3. Tests E2E Playwright (auth, CRUD projets/tâches, import, factures)
+4. Tests unitaires Vitest (services NestJS critiques)
+5. Déploiement : Coolify sur VPS Hostinger  + Sentry monitoring
+6. Configuration RLS Supabase complète
+7. RGPD : export données, droit à l'oubli
+Fichiers critiques à créer
+* turbo.json — config pipeline (build, dev, lint, type-check)
+* package.json root — pnpm workspaces
+* packages/db/prisma/schema.prisma — schéma complet (~600 lignes)
+* packages/shared/src/index.ts — types Zod + enums
+* apps/web/next.config.js, tailwind.config.ts
+* apps/api/src/main.ts, apps/api/src/app.module.ts
+* .env.example — variables d'environnement documentées
+
+### Vérification
+Après chaque sprint :
+
+pnpm build          # Compilation TypeScript sans erreur
+pnpm lint           # ESLint propre
+pnpm db:migrate     # Migrations Prisma OK
+
+Après Sprint 5 :
+
+pnpm test:e2e       # Playwright sur staging
