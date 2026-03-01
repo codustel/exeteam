@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { TimeEntriesService } from './time-entries.service';
 import { TimeEntriesController } from './time-entries.controller';
 import { AuthModule } from '../auth/auth.module';
+import { LeavesModule } from '../leaves/leaves.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, LeavesModule],
   controllers: [TimeEntriesController],
   providers: [TimeEntriesService],
   exports: [TimeEntriesService],

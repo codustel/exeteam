@@ -81,6 +81,10 @@ const DEFAULT_PERMISSIONS = [
   { module: 'custom_fields', action: 'configure' },
   { module: 'custom_fields', action: 'read' },
   { module: 'custom_fields', action: 'update' },
+  // Timesheets
+  { module: 'timesheets', action: 'read' },
+  { module: 'timesheets', action: 'validate' },
+  { module: 'timesheets', action: 'export' },
 ];
 
 // Role-permission matrix
@@ -91,23 +95,28 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'employees.read', 'employees.update', 'hr.read_salaries',
     'commercial.*', 'reports.*', 'leaves.*', 'messaging.access',
     'tags.*', 'import.excel', 'custom_fields.*', 'accounting.*',
+    'timesheets.*',
   ],
   responsable_production: [
     'projects.*', 'tasks.*', 'sites.*', 'clients.read', 'clients.create',
     'clients.update', 'employees.read', 'leaves.read', 'leaves.approve',
     'messaging.access', 'tags.*', 'import.excel', 'custom_fields.*',
+    'timesheets.read', 'timesheets.validate',
   ],
   employe: [
     'tasks.read', 'tasks.update', 'tasks.timelog', 'sites.read',
     'projects.read', 'clients.read', 'leaves.create', 'leaves.read',
     'messaging.access', 'accounting.read', 'accounting.write',
+    'timesheets.read',
   ],
   comptable: [
     'accounting.*', 'commercial.*', 'reports.read_financial_dashboard',
     'clients.read', 'employees.read',
+    'timesheets.read', 'timesheets.export',
   ],
   rh: [
     'employees.*', 'hr.*', 'leaves.*', 'clients.read',
+    'timesheets.read', 'timesheets.export',
   ],
   client: [
     'projects.read', 'tasks.read', 'sites.read',

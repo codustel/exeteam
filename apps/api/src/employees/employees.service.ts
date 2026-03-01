@@ -7,6 +7,18 @@ import { ListEmployeesDto } from './dto/list-employees.dto';
 export class EmployeesService {
   constructor(private prisma: PrismaService) {}
 
+  async findByUserId(userId: string) {
+    const employee = await this.prisma.employee.findUnique({
+      where: { userId },
+      include: {
+        department: { select: { id: true, name: true } },
+        manager: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+    if (!employee) throw new NotFoundException('No employee linked to this user');
+    return employee;
+  }
+
   async findAll(dto: ListEmployeesDto) {
     const { page, limit, search, departmentId, contractType, managerId, isActive } = dto;
     const skip = (page - 1) * limit;

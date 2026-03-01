@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards,
+  Controller, Get, Post, Patch, Delete, Param, Body, Query, Req, UseGuards,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto, UpdateEmployeeDto } from './dto/create-employee.dto';
@@ -7,11 +7,19 @@ import { ListEmployeesDto } from './dto/list-employees.dto';
 import { JwtAuthGuard } from '../auth/auth.guard';
 import { RequirePermissions } from '../auth/permissions.decorator';
 import { PermissionsGuard } from '../auth/permissions.guard';
+import type { AuthUser } from '../auth/supabase.strategy';
+
+interface RequestWithUser { user: AuthUser; }
 
 @Controller('employees')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class EmployeesController {
   constructor(private employeesService: EmployeesService) {}
+
+  @Get('me')
+  getMe(@Req() req: RequestWithUser) {
+    return this.employeesService.findByUserId(req.user.id);
+  }
 
   @Get('stats')
   @RequirePermissions('employees.read')

@@ -34,6 +34,8 @@ export interface EmployeeStats {
 }
 
 export const employeesApi = {
+  getMe: () => apiRequest<EmployeeListItem>('/employees/me'),
+
   list: (params: Record<string, string | number | boolean | undefined>) => {
     const qs = new URLSearchParams(
       Object.entries(params)

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, FolderKanban, CheckSquare, MapPin, Users, Building2,
-  Package, FileText, Receipt, Euro, MessageSquare,
+  Package, FileText, Receipt, Euro, MessageSquare, Clock,
   Upload, Settings, BarChart3, CalendarDays, ChevronLeft, ChevronRight,
   FileCheck, TrendingUp, Factory, ChevronDown, ChevronUp,
 } from 'lucide-react';
@@ -30,6 +30,7 @@ type NavEntry = NavItem | { group: NavGroup };
 const navEntries: NavEntry[] = [
   { label: 'Projets', href: '/projects', icon: FolderKanban },
   { label: 'Tâches', href: '/tasks', icon: CheckSquare },
+  { label: 'Pointage', href: '/timesheets', icon: Clock },
   { label: 'Sites', href: '/sites', icon: MapPin },
   { label: 'Clients', href: '/clients', icon: Building2 },
   { label: 'Codes produits', href: '/products', icon: Package },
