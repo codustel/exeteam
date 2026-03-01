@@ -155,3 +155,54 @@ export const INTERLOCUTEUR_FONCTION = {
   RESP_BE: 'resp_be',
   AUTRE: 'autre',
 } as const;
+
+// ── Purchase Invoice Statuses ──
+export const PURCHASE_INVOICE_STATUS = {
+  EN_ATTENTE: 'en_attente',
+  VALIDEE: 'validee',
+  PAYEE_PARTIELLEMENT: 'payee_partiellement',
+  PAYEE: 'payee',
+  ANNULEE: 'annulee',
+} as const;
+
+export type PurchaseInvoiceStatus = (typeof PURCHASE_INVOICE_STATUS)[keyof typeof PURCHASE_INVOICE_STATUS];
+
+export const PURCHASE_INVOICE_STATUS_LABELS: Record<PurchaseInvoiceStatus, string> = {
+  en_attente: 'En attente',
+  validee: 'Validée',
+  payee_partiellement: 'Payée partiellement',
+  payee: 'Payée',
+  annulee: 'Annulée',
+};
+
+export const PURCHASE_INVOICE_STATUS_COLORS: Record<PurchaseInvoiceStatus, string> = {
+  en_attente: '#F59E0B',
+  validee: '#3B82F6',
+  payee_partiellement: '#8B5CF6',
+  payee: '#22C55E',
+  annulee: '#6B7280',
+};
+
+// ── Expense Report Statuses ──
+export const EXPENSE_REPORT_STATUS = {
+  EN_ATTENTE: 'en_attente',
+  APPROUVE: 'approuve',
+  REFUSE: 'refuse',
+  REMBOURSE: 'rembourse',
+} as const;
+
+export type ExpenseReportStatus = (typeof EXPENSE_REPORT_STATUS)[keyof typeof EXPENSE_REPORT_STATUS];
+
+export const EXPENSE_REPORT_STATUS_LABELS: Record<ExpenseReportStatus, string> = {
+  en_attente: 'En attente',
+  approuve: 'Approuvé',
+  refuse: 'Refusé',
+  rembourse: 'Remboursé',
+};
+
+export const EXPENSE_REPORT_STATUS_COLORS: Record<ExpenseReportStatus, string> = {
+  en_attente: '#F59E0B',
+  approuve: '#22C55E',
+  refuse: '#EF4444',
+  rembourse: '#3B82F6',
+};
