@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { BullModule } from '@nestjs/bull';
 import { AppController } from './app.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
@@ -24,6 +25,7 @@ import { PushModule } from './push/push.module';
 import { CommercialModule } from './commercial/commercial.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { AccountingModule } from './accounting/accounting.module';
+import { ImportModule } from './import/import.module';
 
 @Module({
   imports: [
@@ -37,6 +39,16 @@ import { AccountingModule } from './accounting/accounting.module';
         limit: 100,
       },
     ]),
+    BullModule.forRootAsync({
+      useFactory: (config: ConfigService) => ({
+        redis: {
+          host: config.get('REDIS_HOST', 'localhost'),
+          port: config.get<number>('REDIS_PORT', 6379),
+          password: config.get('REDIS_PASSWORD'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -59,6 +71,7 @@ import { AccountingModule } from './accounting/accounting.module';
     CommercialModule,
     MessagingModule,
     AccountingModule,
+    ImportModule,
   ],
   controllers: [AppController],
 })
